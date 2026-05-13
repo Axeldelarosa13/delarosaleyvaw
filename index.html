@@ -239,7 +239,23 @@
                 <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl shadow-xl h-fit">
                     <form id="form-ia" class="space-y-4">
                         <div class="grid grid-cols-2 gap-4">
-                            <div><label class="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-1">Marca</label><input type="text" name="marca" required placeholder="Apple" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white focus:border-brand-500 outline-none text-sm" /></div>
+                            <div>
+                                <label class="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-1">Marca</label>
+                                <select name="marca" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white focus:border-brand-500 outline-none text-sm cursor-pointer">
+                                    <option value="">Seleccionar...</option>
+                                    <option value="Apple">Apple</option>
+                                    <option value="Samsung">Samsung</option>
+                                    <option value="Motorola">Motorola</option>
+                                    <option value="Xiaomi">Xiaomi / Poco / Redmi</option>
+                                    <option value="Huawei">Huawei</option>
+                                    <option value="Honor">Honor</option>
+                                    <option value="Oppo">Oppo</option>
+                                    <option value="Vivo">Vivo</option>
+                                    <option value="Realme">Realme</option>
+                                    <option value="ZTE">ZTE</option>
+                                    <option value="Otra">Otra</option>
+                                </select>
+                            </div>
                             <div><label class="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-1">Modelo</label><input type="text" name="modelo" required placeholder="iPhone 13" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white focus:border-brand-500 outline-none text-sm" /></div>
                         </div>
                         <div><label class="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-1">Síntomas del equipo</label><textarea name="sintomas" required rows="3" placeholder="No enciende tras mojarse..." class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white focus:border-brand-500 outline-none resize-none text-sm"></textarea></div>
@@ -263,6 +279,7 @@
                         <p class="font-bold uppercase tracking-widest text-xs">Procesando con IA...</p>
                     </div>
                     
+                    <!-- Reparado: Resultados limpios de IA -->
                     <div id="ia-results" class="hidden space-y-4 relative z-10 animate-fade-in">
                         <div class="bg-zinc-950 border border-zinc-800 p-4 rounded-xl">
                             <span class="text-[10px] text-brand-500 font-black uppercase tracking-widest">Falla Detectada</span>
@@ -279,7 +296,7 @@
                             </div>
                         </div>
                         <div class="bg-zinc-950 border border-zinc-800 p-4 rounded-xl">
-                            <span class="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Explicación Profesional al Cliente</span>
+                            <span class="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Explicación para Cliente</span>
                             <p id="ia-res-rec" class="text-zinc-300 mt-2 text-sm italic"></p>
                         </div>
                     </div>
@@ -289,14 +306,12 @@
 
     </main>
 
-    <!-- MODALES GLOBALES -->
-    
-    <!-- Modal Nueva Reparación -->
+    <!-- Modal Nueva Reparación (Restaurado) -->
     <div id="modal-nueva-reparacion" class="modal-wrapper fixed inset-0 bg-black/80 backdrop-blur-sm items-center justify-center p-4 z-50 hidden no-print">
         <div class="bg-zinc-900 rounded-2xl w-full max-w-2xl shadow-2xl border border-zinc-800 max-h-[90vh] flex flex-col overflow-hidden animate-fade-in">
             <div class="flex justify-between items-center p-6 border-b border-zinc-800 bg-zinc-900/80 backdrop-blur shrink-0">
-                <h3 class="text-lg font-black text-white flex items-center gap-2"><i class="ph-fill ph-check-circle text-brand-500 text-xl"></i> Ingreso de Equipo</h3>
-                <button onclick="closeModal('modal-nueva-reparacion')" class="text-zinc-500 hover:text-white"><i class="ph-bold ph-x text-xl"></i></button>
+                <h3 class="text-lg font-black text-white flex items-center gap-2"><i class="ph-fill ph-check-circle text-brand-500"></i> Ingreso de Equipo</h3>
+                <button onclick="closeModal('modal-nueva-reparacion')" class="text-zinc-500 hover:text-white transition-colors"><i class="ph-bold ph-x"></i></button>
             </div>
             
             <div class="p-6 overflow-y-auto custom-scrollbar bg-zinc-950/30">
@@ -305,17 +320,33 @@
                     <div class="bg-zinc-900 p-5 rounded-xl border border-zinc-800 space-y-4">
                         <h4 class="text-[10px] font-black uppercase tracking-widest text-brand-500 mb-2 border-b border-zinc-800 pb-2">Paso 1: Datos Generales</h4>
                         <div class="grid grid-cols-2 gap-4">
-                            <div><label class="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-1">Folio</label><input type="text" name="folio" id="input-folio" readonly class="w-full bg-zinc-950/50 font-mono text-brand-400 border border-zinc-800 rounded-xl p-3 text-sm outline-none"></div>
+                            <div><label class="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-1">Folio Interno</label><input type="text" id="input-folio" name="folio" class="w-full bg-zinc-950/50 border border-zinc-800 rounded-xl p-3 text-brand-400 font-mono outline-none text-sm" readonly></div>
                             <div>
                                 <label class="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-1">Cliente</label>
-                                <select name="clienteId" id="select-clientes" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-brand-500 text-sm">
+                                <select name="clienteId" id="select-clientes" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-brand-500 text-sm cursor-pointer">
                                     <option value="">Seleccionar...</option>
                                 </select>
                             </div>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
-                            <div><label class="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-1">Marca</label><input type="text" name="marca" required placeholder="Samsung" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-brand-500 text-sm"></div>
-                            <div><label class="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-1">Modelo</label><input type="text" name="modelo" required placeholder="A54" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-brand-500 text-sm"></div>
+                            <div>
+                                <label class="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-1">Marca</label>
+                                <select name="marca" required class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-brand-500 text-sm cursor-pointer">
+                                    <option value="">Seleccionar...</option>
+                                    <option value="Apple">Apple</option>
+                                    <option value="Samsung">Samsung</option>
+                                    <option value="Motorola">Motorola</option>
+                                    <option value="Xiaomi">Xiaomi / Poco / Redmi</option>
+                                    <option value="Huawei">Huawei</option>
+                                    <option value="Honor">Honor</option>
+                                    <option value="Oppo">Oppo</option>
+                                    <option value="Vivo">Vivo</option>
+                                    <option value="Realme">Realme</option>
+                                    <option value="ZTE">ZTE</option>
+                                    <option value="Otra">Otra</option>
+                                </select>
+                            </div>
+                            <div><label class="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-1">Modelo</label><input type="text" name="modelo" required placeholder="Ej. A54" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-brand-500 text-sm"></div>
                         </div>
                         <div><label class="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-1">Falla Reportada</label><textarea name="falla" required rows="2" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-sm outline-none focus:border-brand-500 resize-none"></textarea></div>
                         <div><label class="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-1">Cotización Previa ($)</label><input type="number" name="presupuesto" step="0.01" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-brand-500 text-sm"></div>
@@ -776,7 +807,9 @@
 
         function updateClienteSelect() {
             const select = document.getElementById('select-clientes');
-            select.innerHTML = '<option value="">Seleccionar...</option>' + state.clientes.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+            if(select) {
+                select.innerHTML = '<option value="">Seleccionar...</option>' + state.clientes.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
+            }
         }
 
         window.actualizarStock = async (id, cantidad, cambio) => {
@@ -806,11 +839,48 @@
         window.importarCatalogoBase = async () => {
             showToast("Importando base de datos...", "info");
             const dataBase = [
+                // APPLE
+                { marca: 'Apple', modelo: 'iPhone 8/SE', reparacion: 'Cambio de Pantalla', costo: 250, precio: 650 },
                 { marca: 'Apple', modelo: 'iPhone 11', reparacion: 'Cambio de Pantalla (Incell)', costo: 450, precio: 950 },
-                { marca: 'Apple', modelo: 'iPhone 13', reparacion: 'Cambio de Pantalla (OLED)', costo: 1200, precio: 2500 },
-                { marca: 'Samsung', modelo: 'Galaxy A54', reparacion: 'Cambio de Pantalla', costo: 600, precio: 1500 },
-                { marca: 'Xiaomi', modelo: 'Poco X3 Pro', reparacion: 'Reballing CPU', costo: 300, precio: 1200 },
-                { marca: 'General', modelo: 'Cualquier', reparacion: 'Baño Químico', costo: 100, precio: 800 }
+                { marca: 'Apple', modelo: 'iPhone 11', reparacion: 'Cambio de Pantalla (OLED Orig)', costo: 750, precio: 1400 },
+                { marca: 'Apple', modelo: 'iPhone 11/12', reparacion: 'Cambio de Batería', costo: 300, precio: 750 },
+                { marca: 'Apple', modelo: 'iPhone 12/12 Pro', reparacion: 'Cambio de Pantalla (OLED)', costo: 850, precio: 1800 },
+                { marca: 'Apple', modelo: 'iPhone 13/13 Pro', reparacion: 'Cambio de Pantalla (OLED)', costo: 1200, precio: 2500 },
+                { marca: 'Apple', modelo: 'iPhone 14 Pro Max', reparacion: 'Cambio de Pantalla (OLED)', costo: 4500, precio: 6500 },
+                { marca: 'Apple', modelo: 'iPhone 12 al 15', reparacion: 'Cambio Cristal Trasero (Láser)', costo: 200, precio: 1200 },
+                { marca: 'Apple', modelo: 'iPhone X al 14', reparacion: 'Reparación Face ID', costo: 150, precio: 1200 },
+                { marca: 'Apple', modelo: 'Todos', reparacion: 'Cambio Centro de Carga', costo: 150, precio: 800 },
+                
+                // SAMSUNG
+                { marca: 'Samsung', modelo: 'Serie A (A13/A14/A15)', reparacion: 'Cambio de Pantalla', costo: 350, precio: 850 },
+                { marca: 'Samsung', modelo: 'Serie A (A34/A54/A55)', reparacion: 'Cambio de Pantalla (OLED)', costo: 700, precio: 1600 },
+                { marca: 'Samsung', modelo: 'Serie S (S21/S22/S23)', reparacion: 'Cambio Pantalla (Original)', costo: 3500, precio: 5000 },
+                { marca: 'Samsung', modelo: 'Serie Z Fold/Flip', reparacion: 'Mica Interna (Hidrogel)', costo: 100, precio: 450 },
+                { marca: 'Samsung', modelo: 'Serie A y M', reparacion: 'Pin de Carga (Subplaca)', costo: 120, precio: 500 },
+                { marca: 'Samsung', modelo: 'Todos', reparacion: 'Cambio de Batería', costo: 250, precio: 650 },
+                
+                // MOTOROLA
+                { marca: 'Motorola', modelo: 'Moto G (G20/G30/G50)', reparacion: 'Cambio de Pantalla', costo: 350, precio: 800 },
+                { marca: 'Motorola', modelo: 'Moto Edge (20/30/40)', reparacion: 'Cambio Pantalla (pOLED)', costo: 1500, precio: 2800 },
+                { marca: 'Motorola', modelo: 'Todos', reparacion: 'Cambio Pin de Carga', costo: 100, precio: 450 },
+                { marca: 'Motorola', modelo: 'Todos', reparacion: 'Batería Genérica', costo: 200, precio: 550 },
+                
+                // XIAOMI / POCO
+                { marca: 'Xiaomi', modelo: 'Redmi Note 10/11/12', reparacion: 'Cambio de Pantalla (OLED)', costo: 650, precio: 1400 },
+                { marca: 'Xiaomi', modelo: 'Poco X3 / X4', reparacion: 'Cambio de Pantalla', costo: 450, precio: 950 },
+                { marca: 'Xiaomi', modelo: 'Poco X3 Pro / M3', reparacion: 'Reballing CPU (Muerte Súbita)', costo: 50, precio: 1200 },
+                { marca: 'Xiaomi', modelo: 'Todos', reparacion: 'Subplaca / Centro Carga', costo: 120, precio: 450 },
+                
+                // OTRAS MARCAS
+                { marca: 'Huawei', modelo: 'Y9 / Nova', reparacion: 'Cambio de Pantalla', costo: 400, precio: 950 },
+                { marca: 'Honor', modelo: 'X7 / X8', reparacion: 'Cambio de Pantalla', costo: 500, precio: 1100 },
+                
+                // SERVICIOS GENERALES
+                { marca: 'General', modelo: 'Android', reparacion: 'Desbloqueo Cuenta Google (FRP)', costo: 0, precio: 450 },
+                { marca: 'General', modelo: 'Android/iOS', reparacion: 'Baño Químico (Humedad)', costo: 100, precio: 800 },
+                { marca: 'General', modelo: 'Android/iOS', reparacion: 'Flasheo / Software', costo: 0, precio: 350 },
+                { marca: 'General', modelo: 'Android/iOS', reparacion: 'Mantenimiento y Limpieza', costo: 50, precio: 300 },
+                { marca: 'General', modelo: 'Android/iOS', reparacion: 'Resoldar Conector FPC', costo: 20, precio: 500 }
             ];
             const batch = writeBatch(state.db);
             const ref = collection(state.db, 'catalogo');
@@ -1024,11 +1094,15 @@
             const prompt = `Eres técnico en Taller de la Rosa, México. Cliente trae: ${data.marca} ${data.modelo}. Síntomas: "${data.sintomas}". Responde SOLO JSON: {"falla_probable": "Falla", "descripcion_tecnica": "Desc", "costo_estimado_mxn": "$ MXN", "nivel_dificultad": "Bajo/Medio/Alto", "recomendacion_cliente": "Script profesional"}`;
 
             try {
-                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${geminiApiKey}`, {
+                // SE CORRIGIÓ LA VERSIÓN DEL MODELO PARA QUE LA IA FUNCIONE PERFECTAMENTE
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json" } })
                 });
                 const json = await res.json();
+                
+                if(!res.ok) throw new Error(json.error?.message || "Error en IA");
+
                 const text = json.candidates[0].content.parts[0].text;
                 const result = JSON.parse(text);
 
@@ -1040,7 +1114,8 @@
                 document.getElementById('ia-loading').classList.add('hidden');
                 document.getElementById('ia-results').classList.remove('hidden');
             } catch (err) {
-                showToast("Fallo al conectar con IA", "error");
+                console.error("AI Error:", err);
+                showToast("Fallo al conectar con IA. Verifica tu API Key.", "error");
                 document.getElementById('ia-loading').classList.add('hidden');
                 document.getElementById('ia-empty-state').classList.remove('hidden');
             } finally {
