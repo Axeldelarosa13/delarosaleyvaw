@@ -1,0 +1,1144 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { initializeApp } from 'firebase/app';
+import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, doc, setDoc, onSnapshot, collection, addDoc, updateDoc, deleteDoc, writeBatch } from 'firebase/firestore';
+import { 
+  Wrench, Users, Package, PlusCircle, Search, Smartphone, 
+  CheckCircle, Clock, AlertCircle, LayoutDashboard, 
+  BrainCircuit, Database, Sparkles, ChevronRight, DollarSign, Bot,
+  Camera, PenTool, Printer, MessageCircle, X, FileText, ImageIcon, GripVertical,
+  BarChart3, ShieldCheck, Activity, Terminal
+} from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Cell } from 'recharts';
+
+// 1. PEGA AQUÍ TU CONFIGURACIÓN DE FIREBASE (Reemplaza estos valores de ejemplo con los tuyos)
+let firebaseConfig = {
+  apiKey: "AIzaSyDginM_GgZULQY09x2d7RIBzlSqwN9kXB4",
+  authDomain: "erp-taller-delarosa.firebaseapp.com",
+  databaseURL: "https://erp-taller-delarosa-default-rtdb.firebaseio.com",
+  projectId: "erp-taller-delarosa",
+  storageBucket: "erp-taller-delarosa.firebasestorage.app",
+  messagingSenderId: "131852818488",
+  appId: "1:131852818488:web:374bd8b1344ec014672ecd",
+  measurementId: "G-3R34R4E5PS"
+};
+
+// Respaldo de seguridad: Si aún no pones tus claves, usamos la base de pruebas temporalmente
+if (firebaseConfig.apiKey === "TU_API_KEY" && typeof __firebase_config !== 'undefined') {
+  try {
+    firebaseConfig = JSON.parse(__firebase_config);
+  } catch (e) {}
+}
+
+// Verificamos si hay una clave válida antes de inicializar Firebase
+const isValidConfig = firebaseConfig.apiKey && firebaseConfig.apiKey !== "TU_API_KEY";
+
+let app, auth, db;
+if (isValidConfig) {
+  try {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+  } catch (e) {
+    console.error("Error al inicializar Firebase:", e);
+  }
+}
+
+// 2. PEGA AQUÍ TU API KEY DE GOOGLE AI STUDIO (Ej. "AIzaSyD...")
+const apiKey = "AIzaSyB6SzIbP3jzLUno1-0Ue3UkKcgzCO2QGkc"; 
+
+const formatCurrency = (amount) => {
+  return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount || 0);
+};
+
+const SignaturePad = ({ onEnd }) => {
+  const canvasRef = useRef(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#09090b'; 
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+  }, []);
+
+  const startDrawing = (e) => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX || e.touches[0].clientX) - rect.left;
+    const y = (e.clientY || e.touches[0].clientY) - rect.top;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    setIsDrawing(true);
+  };
+
+  const draw = (e) => {
+    if (!isDrawing) return;
+    e.preventDefault(); 
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX || e.touches[0].clientX) - rect.left;
+    const y = (e.clientY || e.touches[0].clientY) - rect.top;
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  };
+
+  const stopDrawing = () => {
+    setIsDrawing(false);
+    onEnd(canvasRef.current.toDataURL('image/png'));
+  };
+
+  const clear = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    onEnd(null);
+  };
+
+  return (
+    <div className="border border-zinc-300 rounded-xl overflow-hidden bg-white relative shadow-inner">
+      <canvas 
+        ref={canvasRef}
+        onMouseDown={startDrawing} onMouseMove={draw} onMouseUp={stopDrawing} onMouseLeave={stopDrawing}
+        onTouchStart={startDrawing} onTouchMove={draw} onTouchEnd={stopDrawing}
+        className="w-full h-40 cursor-crosshair touch-none"
+      />
+      <button type="button" onClick={clear} className="absolute top-2 right-2 text-[10px] font-black uppercase tracking-widest bg-zinc-100 text-zinc-500 px-3 py-1.5 rounded-lg border border-zinc-200 hover:bg-zinc-200 transition-colors shadow-sm">Limpiar Lienzo</button>
+    </div>
+  );
+};
+
+const compressImage = (file) => {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 800;
+        const scaleSize = MAX_WIDTH / img.width;
+        canvas.width = MAX_WIDTH;
+        canvas.height = img.height * scaleSize;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', 0.6));
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+};
+
+export default function ERPTallerPro() {
+  const [user, setUser] = useState(null);
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [loading, setLoading] = useState(true);
+  const [configError, setConfigError] = useState(false);
+  const [permissionError, setPermissionError] = useState(false);
+  const [toastMsg, setToastMsg] = useState(null); // Custom Toast Notification
+  
+  const [reparaciones, setReparaciones] = useState([]);
+  const [clientes, setClientes] = useState([]);
+  const [catalogo, setCatalogo] = useState([]);
+  const [inventario, setInventario] = useState([]);
+  
+  const [showNuevaReparacion, setShowNuevaReparacion] = useState(false);
+  const [showNuevoCliente, setShowNuevoCliente] = useState(false);
+  const [showNuevoCatalogo, setShowNuevoCatalogo] = useState(false);
+  const [showNuevoArticulo, setShowNuevoArticulo] = useState(false);
+  
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [ticketToPrint, setTicketToPrint] = useState(null);
+
+  useEffect(() => {
+    if (!isValidConfig || !auth) {
+      setConfigError(true);
+      setLoading(false);
+      return;
+    }
+
+    const initAuth = async () => {
+      try {
+        // Ignoramos el token del entorno y forzamos el inicio anónimo en TU Firebase
+        await signInAnonymously(auth);
+      } catch (error) {
+        console.error("Error de conexión Firebase:", error);
+        setConfigError(true);
+        setLoading(false);
+      }
+    };
+    initAuth();
+    
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      if (!currentUser && !configError) setLoading(false);
+    });
+    return () => unsubscribe();
+  }, [configError]);
+
+  useEffect(() => {
+    if (!user || !db) return;
+    
+    // Rutas directas a tu base de datos global de Taller de la Rosa
+    // Hemos eliminado la restricción por UID de usuario para que funcione como
+    // una base de datos de empresa unificada (siempre que Firestore esté en "Modo de Prueba").
+    const repRef = collection(db, 'reparaciones');
+    const cliRef = collection(db, 'clientes');
+    const catRef = collection(db, 'catalogo');
+    const invRef = collection(db, 'inventario');
+
+    const unsubRep = onSnapshot(repRef, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      data.sort((a, b) => b.fechaRecepcion - a.fechaRecepcion);
+      setReparaciones(data);
+    }, (error) => {
+       console.error("Error leyendo reparaciones:", error);
+       if (error.code === 'permission-denied' || error.message.includes('permission')) {
+         setPermissionError(true);
+       } else {
+         showToast("Error de conexión con la base de datos", "error");
+       }
+       setLoading(false);
+    });
+
+    const unsubCli = onSnapshot(cliRef, (snapshot) => {
+        setClientes(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })))
+    }, (error) => {
+        if (error.code === 'permission-denied') setPermissionError(true);
+    });
+
+    const unsubCat = onSnapshot(catRef, (snapshot) => {
+        setCatalogo(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })))
+    }, (error) => {
+        if (error.code === 'permission-denied') setPermissionError(true);
+    });
+
+    const unsubInv = onSnapshot(invRef, (snapshot) => {
+      setInventario(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      setLoading(false);
+    }, (error) => {
+        if (error.code === 'permission-denied') setPermissionError(true);
+        setLoading(false);
+    });
+    
+    return () => { unsubRep(); unsubCli(); unsubCat(); unsubInv(); };
+  }, [user]);
+
+  useEffect(() => {
+    if (ticketToPrint) {
+      setTimeout(() => { window.print(); setTicketToPrint(null); }, 800);
+    }
+  }, [ticketToPrint]);
+
+  const showToast = (mensaje, tipo = 'info') => {
+    setToastMsg({ mensaje, tipo });
+    setTimeout(() => setToastMsg(null), 4000);
+  };
+
+  const enviarWhatsApp = (tipo, rep) => {
+    if (!rep.clienteTelefono) { 
+      showToast("Operación cancelada: El cliente no tiene un teléfono registrado.", "error"); 
+      return; 
+    }
+    let mensaje = "";
+    const telefono = rep.clienteTelefono.replace(/\D/g, ''); 
+    const nombreCorto = rep.clienteNombre.split(' ')[0];
+    const fecha = new Date(rep.fechaRecepcion).toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' });
+    
+    if (tipo === 'ingreso') {
+      mensaje = `Hola ${nombreCorto} 👋 Tu equipo ${rep.marca} ${rep.modelo} ya fue ingresado de forma segura a Taller de la Rosa.\n\n📋 Folio de Servicio: *${rep.folio}*\n🔍 Falla Reportada: ${rep.falla}\n📅 Fecha: ${fecha}\n\nTe notificaremos por este medio en cuanto tengamos novedades de tu diagnóstico. ¡Agradecemos tu preferencia!`;
+    } else if (tipo === 'cotizacion') {
+      mensaje = `Hola ${nombreCorto} 👋 Tenemos el diagnóstico técnico listo para tu ${rep.marca} ${rep.modelo} en Taller de la Rosa.\n\n🔧 *Reporte del Técnico:*\n${rep.falla}\n💰 *Costo Total:* ${formatCurrency(rep.presupuesto)}\n\n¿Nos brindas tu autorización para proceder con la reparación? 👍`;
+    } else if (tipo === 'entrega') {
+      mensaje = `¡Tu equipo está listo! 🎉\n\nHola ${nombreCorto}, tu ${rep.marca} ${rep.modelo} ya superó nuestras pruebas de calidad y está listo para ser recogido en Taller de la Rosa.\n\n¡Te esperamos pronto!`;
+    }
+
+    window.open(`https://wa.me/52${telefono}?text=${encodeURIComponent(mensaje)}`, '_blank');
+  };
+
+  const handleSubmitGenerico = async (e, collectionName, extraData = {}, setModalFn) => {
+    e.preventDefault();
+    if (!user) return;
+    const formData = new FormData(e.target);
+    const dataObj = Object.fromEntries(formData.entries());
+    ['presupuesto', 'costo', 'precio', 'cantidad', 'precioCompra', 'precioVenta'].forEach(key => { 
+      if (dataObj[key]) dataObj[key] = parseFloat(dataObj[key]); 
+    });
+    const newData = { ...dataObj, ...extraData, fechaRegistro: Date.now() };
+    await addDoc(collection(db, collectionName), newData);
+    setModalFn(false);
+    showToast("Registro guardado exitosamente.", "success");
+  };
+
+  const cambiarEstadoReparacion = async (id, nuevoEstado) => {
+    if (!user) return;
+    await updateDoc(doc(db, 'reparaciones', id), { estado: nuevoEstado });
+  };
+
+  const actualizarStock = async (id, cantidadActual, cambio) => {
+    if (!user) return;
+    const nuevaCantidad = cantidadActual + cambio;
+    if (nuevaCantidad < 0) return;
+    await updateDoc(doc(db, 'inventario', id), { cantidad: nuevaCantidad });
+  };
+
+  const eliminarDocumento = async (coleccion, id) => {
+    if (!user) return;
+    await deleteDoc(doc(db, coleccion, id));
+    showToast("El registro ha sido eliminado del sistema.", "info");
+  };
+
+  const getChartData = () => {
+    const estados = ['Recibido', 'En diagnóstico', 'En reparación', 'Listo para entrega'];
+    return estados.map(est => ({
+      name: est.replace(' para entrega', ''),
+      cantidad: reparaciones.filter(r => r.estado === est).length,
+    }));
+  };
+
+  const VistaDashboard = () => {
+    const equiposActivos = reparaciones.filter(r => r.estado !== 'Entregado').length;
+    const ingresosMes = reparaciones.filter(r => r.estado === 'Entregado').reduce((acc, curr) => acc + (parseFloat(curr.presupuesto) || 0), 0);
+    const totalClientes = clientes.length;
+    const chartData = getChartData();
+
+    return (
+      <div className="h-full flex flex-col animate-fade-in overflow-y-auto custom-scrollbar pr-2 pb-10">
+        <div className="mb-6">
+          <h2 className="text-3xl font-black text-white tracking-tight mb-1">Centro de Comando</h2>
+          <p className="text-zinc-400 text-sm">Resumen operativo y financiero · Taller de la Rosa</p>
+        </div>
+        
+        {/* Bento Grid Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="md:col-span-1 bg-zinc-900 border border-zinc-800/80 p-6 rounded-2xl shadow-lg relative overflow-hidden group">
+            <div className="absolute -right-4 -top-4 text-orange-500/10 group-hover:text-orange-500/20 transition-colors duration-500"><Activity size={100}/></div>
+            <p className="text-zinc-400 font-bold text-xs uppercase tracking-widest mb-1 z-10 relative">Equipos Activos</p>
+            <h3 className="text-5xl font-black text-white z-10 relative">{equiposActivos}</h3>
+          </div>
+          
+          <div className="md:col-span-2 bg-gradient-to-br from-zinc-900 to-zinc-950 border border-zinc-800/80 p-6 rounded-2xl shadow-lg relative overflow-hidden group">
+             <div className="absolute right-0 top-0 w-full h-full bg-gradient-to-l from-green-500/5 to-transparent pointer-events-none"></div>
+             <div className="flex flex-col h-full justify-between">
+                <div>
+                  <p className="text-zinc-400 font-bold text-xs uppercase tracking-widest mb-1">Flujo de Caja (Entregados)</p>
+                  <h3 className="text-5xl font-black text-green-400">{formatCurrency(ingresosMes)}</h3>
+                </div>
+                <div className="mt-4 flex items-center gap-2 text-xs text-green-500/80 font-medium">
+                  <CheckCircle size={14} /> Contabilidad actualizada en tiempo real
+                </div>
+             </div>
+          </div>
+          
+          <div className="md:col-span-1 bg-zinc-900 border border-zinc-800/80 p-6 rounded-2xl shadow-lg relative overflow-hidden">
+            <div className="absolute right-2 bottom-2 text-blue-500/10"><Users size={80}/></div>
+            <p className="text-zinc-400 font-bold text-xs uppercase tracking-widest mb-1 z-10 relative">Cartera Clientes</p>
+            <h3 className="text-5xl font-black text-white z-10 relative">{totalClientes}</h3>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1">
+          {/* Gráfica Recharts */}
+          <div className="lg:col-span-2 bg-zinc-900 border border-zinc-800/80 rounded-2xl p-6 flex flex-col shadow-lg">
+            <h3 className="text-sm font-bold text-zinc-300 uppercase tracking-widest mb-6 flex items-center gap-2">
+              <BarChart3 className="text-orange-500" size={18}/> Distribución de Carga Laboral
+            </h3>
+            <div className="flex-1 w-full min-h-[250px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+                  <XAxis dataKey="name" stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis stroke="#a1a1aa" fontSize={12} tickLine={false} axisLine={false} />
+                  <RechartsTooltip 
+                    cursor={{fill: '#27272a', opacity: 0.4}}
+                    contentStyle={{ backgroundColor: '#18181b', border: '1px solid #3f3f46', borderRadius: '12px', color: '#fff' }}
+                  />
+                  <Bar dataKey="cantidad" radius={[6, 6, 0, 0]}>
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={index === 3 ? '#22c55e' : '#f97316'} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Lista Rápida */}
+          <div className="lg:col-span-1 bg-zinc-900 border border-zinc-800/80 rounded-2xl p-6 flex flex-col shadow-lg">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-sm font-bold text-zinc-300 uppercase tracking-widest flex items-center gap-2"><Clock className="text-orange-500" size={18}/> Últimos Ingresos</h3>
+            </div>
+            <div className="space-y-3 overflow-y-auto pr-2 custom-scrollbar flex-1">
+              {reparaciones.slice(0, 6).map(rep => (
+                <div key={rep.id} onClick={() => setSelectedTicket(rep)} className="bg-zinc-950/50 border border-zinc-800/50 p-3 rounded-xl cursor-pointer hover:border-orange-500/50 transition-colors group">
+                  <div className="flex justify-between items-center mb-1">
+                     <p className="font-bold text-white text-sm group-hover:text-orange-400 transition-colors">{rep.marca} {rep.modelo}</p>
+                     <span className="text-[10px] font-mono text-zinc-500 bg-zinc-800 px-1.5 py-0.5 rounded">{rep.folio}</span>
+                  </div>
+                  <div className="flex justify-between items-end">
+                    <p className="text-xs text-zinc-400 truncate max-w-[120px]">{rep.clienteNombre}</p>
+                    <div className={`w-2 h-2 rounded-full ${rep.estado === 'Entregado' ? 'bg-zinc-600' : rep.estado === 'Listo para entrega' ? 'bg-green-500' : 'bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.6)]'}`}></div>
+                  </div>
+                </div>
+              ))}
+              {reparaciones.length === 0 && <p className="text-zinc-500 text-center py-8 text-sm">El taller está vacío.</p>}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const VistaReparaciones = () => {
+    const [busqueda, setBusqueda] = useState("");
+    const estados = ['Recibido', 'En diagnóstico', 'En reparación', 'Listo para entrega', 'Entregado'];
+
+    const handleDragStart = (e, repId) => {
+      e.dataTransfer.setData('ticketId', repId);
+      e.target.style.opacity = '0.5';
+    };
+    const handleDragEnd = (e) => { e.target.style.opacity = '1'; };
+    const handleDragOver = (e) => { e.preventDefault(); };
+    const handleDrop = (e, nuevoEstado) => {
+      e.preventDefault();
+      const ticketId = e.dataTransfer.getData('ticketId');
+      if(ticketId) cambiarEstadoReparacion(ticketId, nuevoEstado);
+    };
+
+    const filtradas = reparaciones.filter(r => 
+      r.clienteNombre.toLowerCase().includes(busqueda.toLowerCase()) || 
+      r.modelo.toLowerCase().includes(busqueda.toLowerCase()) || 
+      r.folio.toLowerCase().includes(busqueda.toLowerCase())
+    );
+
+    return (
+      <div className="h-full flex flex-col animate-fade-in">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+              <Terminal className="text-orange-500"/> Kanban de Taller
+            </h2>
+            <p className="text-sm text-zinc-400 mt-1">Arrastra las tarjetas para actualizar su estado (Drag & Drop).</p>
+          </div>
+          
+          <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16}/>
+              <input 
+                type="text" placeholder="Folio, Cliente o Modelo..." 
+                value={busqueda} onChange={(e) => setBusqueda(e.target.value)}
+                className="w-full md:w-64 bg-zinc-900 border border-zinc-800 text-white rounded-xl pl-9 pr-4 py-2.5 outline-none focus:border-orange-500 transition-colors shadow-inner text-sm font-medium"
+              />
+            </div>
+            <button onClick={() => setShowNuevaReparacion(true)} className="flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-400 text-white px-5 py-2.5 rounded-xl transition-colors font-bold shadow-lg shadow-orange-500/20 whitespace-nowrap text-sm">
+              <PlusCircle size={18} /> Nuevo Ingreso
+            </button>
+          </div>
+        </div>
+
+        <div className="flex gap-4 overflow-x-auto pb-4 flex-1 custom-scrollbar">
+          {estados.map(estado => (
+            <div 
+              key={estado} 
+              onDragOver={handleDragOver} 
+              onDrop={(e) => handleDrop(e, estado)}
+              className="bg-zinc-900/40 backdrop-blur-sm rounded-2xl p-3 min-w-[320px] w-[320px] border border-zinc-800/80 flex flex-col h-full"
+            >
+              <div className="flex justify-between items-center mb-4 px-1">
+                <h3 className="font-bold text-zinc-300 text-xs uppercase tracking-widest">
+                  {estado} {estado === 'Listo para entrega' && '✓'}
+                </h3>
+                <span className="bg-zinc-800 text-zinc-400 text-xs px-2 py-0.5 rounded-md font-bold border border-zinc-700">
+                  {filtradas.filter(r => r.estado === estado).length}
+                </span>
+              </div>
+              <div className="flex-1 overflow-y-auto pr-1 custom-scrollbar space-y-3">
+                {filtradas.filter(r => r.estado === estado).map(rep => (
+                  <div 
+                    key={rep.id} 
+                    draggable 
+                    onDragStart={(e) => handleDragStart(e, rep.id)}
+                    onDragEnd={handleDragEnd}
+                    className={`bg-zinc-900 p-4 rounded-xl border border-zinc-800 border-l-4 flex flex-col gap-2 shadow-lg transition-all hover:border-orange-500 cursor-grab active:cursor-grabbing relative group ${estado === 'Entregado' ? 'border-l-zinc-700 opacity-60' : estado === 'Listo para entrega' ? 'border-l-green-500' : 'border-l-orange-500'}`}
+                  >
+                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-zinc-600"><GripVertical size={16}/></div>
+                    
+                    <div className="flex justify-between items-start cursor-pointer pr-4" onClick={() => setSelectedTicket(rep)}>
+                      <div>
+                        <h4 className="font-bold text-white text-base group-hover:text-orange-400 transition-colors leading-tight">{rep.marca} {rep.modelo}</h4>
+                        <p className="text-xs text-zinc-500 font-mono mt-1">{rep.folio}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-between items-end mt-2">
+                       <p className="text-xs text-zinc-400 flex items-center gap-1 truncate max-w-[150px]"><Users size={12} className="shrink-0"/> {rep.clienteNombre}</p>
+                       <span className="text-[10px] px-2 py-1 rounded bg-zinc-950 text-green-400 font-bold border border-zinc-800 tracking-wider">{formatCurrency(rep.presupuesto)}</span>
+                    </div>
+
+                    <div className="bg-zinc-950/50 p-2.5 rounded-lg text-xs text-zinc-300 mt-2 line-clamp-2 border border-zinc-800/50 leading-relaxed italic">
+                      "{rep.falla}"
+                    </div>
+                    
+                    <div className="mt-3 pt-3 border-t border-zinc-800/50 flex justify-between items-center">
+                      <span className="text-[10px] text-zinc-500 flex items-center gap-1 font-medium"><Clock size={10}/> {new Date(rep.fechaRecepcion).toLocaleDateString()}</span>
+                      <button onClick={() => setSelectedTicket(rep)} className="text-[10px] text-orange-400 font-black hover:text-orange-300 transition-colors uppercase tracking-widest">Abrir Expediente &rarr;</button>
+                    </div>
+                  </div>
+                ))}
+                {filtradas.filter(r => r.estado === estado).length === 0 && (
+                  <div className="h-24 border-2 border-dashed border-zinc-800/60 rounded-xl flex items-center justify-center text-zinc-600 text-xs font-bold uppercase tracking-widest">Soltar área</div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const AsistenteIA = () => {
+    const [iaLoading, setIaLoading] = useState(false);
+    const [iaResult, setIaResult] = useState(null);
+
+    const analizarFalla = async (e) => {
+      e.preventDefault();
+      setIaLoading(true); setIaResult(null);
+      const formData = new FormData(e.target);
+      const prompt = `Eres el ingeniero en jefe del 'Taller de la Rosa' en México, experto en microelectrónica. Un cliente trae un ${formData.get('marca')} ${formData.get('modelo')}. Síntomas: "${formData.get('sintomas')}". Analiza y responde ÚNICAMENTE con un JSON válido: {"falla_probable": "Nombre de la falla", "descripcion_tecnica": "Explicación breve", "costo_estimado_mxn": "Rango de costo en MXN", "nivel_dificultad": "Bajo, Medio, Alto", "recomendacion_cliente": "Qué decirle profesionalmente"}`;
+      try {
+        const payload = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json" } };
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        if (!response.ok) throw new Error("Error API");
+        const data = await response.json();
+        const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (textResponse) setIaResult(JSON.parse(textResponse));
+      } catch (err) { showToast("Fallo al conectar con IA.", "error"); } finally { setIaLoading(false); }
+    };
+
+    return (
+      <div className="h-full flex flex-col max-w-5xl mx-auto w-full animate-fade-in">
+        <div className="mb-8 text-center">
+          <div className="inline-flex items-center justify-center p-3 bg-orange-500/10 rounded-2xl mb-4 border border-orange-500/20">
+            <BrainCircuit className="text-orange-500 w-10 h-10" />
+          </div>
+          <h2 className="text-3xl font-black text-white tracking-tight">Asistente <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">de la Rosa AI</span></h2>
+          <p className="text-zinc-400 mt-2 text-sm">Diagnósticos de ingeniería y cotizaciones instantáneas potenciadas por IA.</p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 flex-1">
+          <div className="bg-zinc-900 border border-zinc-800 p-6 rounded-2xl shadow-xl h-fit">
+            <form onSubmit={analizarFalla} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div><label className="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-1">Marca</label><input type="text" name="marca" required placeholder="Apple" className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white focus:border-orange-500 outline-none text-sm" /></div>
+                <div><label className="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-1">Modelo</label><input type="text" name="modelo" required placeholder="iPhone 13" className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white focus:border-orange-500 outline-none text-sm" /></div>
+              </div>
+              <div><label className="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-1">Síntomas del equipo</label><textarea name="sintomas" required rows="3" placeholder="No enciende tras mojarse..." className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white focus:border-orange-500 outline-none resize-none text-sm"></textarea></div>
+              <button type="submit" disabled={iaLoading} className="w-full py-3.5 bg-orange-500 hover:bg-orange-400 text-white rounded-xl font-bold transition-all shadow-lg shadow-orange-500/20 flex justify-center items-center gap-2 text-sm disabled:opacity-50">
+                {iaLoading ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> Procesando...</> : <><Bot size={18}/> Generar Reporte Técnico</>}
+              </button>
+            </form>
+          </div>
+
+          <div className="bg-zinc-900/50 border border-zinc-800/50 p-6 rounded-2xl flex flex-col relative overflow-hidden">
+             <div className="absolute top-0 right-0 p-8 opacity-5 text-orange-500"><ShieldCheck size={120}/></div>
+            <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2 relative z-10"><Sparkles className="text-orange-400" size={18} /> Resultados</h3>
+            
+            {!iaLoading && !iaResult && <div className="flex-1 flex flex-col items-center justify-center text-zinc-600 text-sm text-center px-4"><Bot size={48} className="mb-4 opacity-20" /><p>Describe los síntomas en el panel para obtener una cotización del mercado y diagnóstico en tiempo real.</p></div>}
+            
+            {iaResult && !iaLoading && (
+              <div className="space-y-4 relative z-10 animate-fade-in">
+                <div className="bg-zinc-950 border border-zinc-800 p-4 rounded-xl">
+                  <span className="text-[10px] text-orange-500 font-black uppercase tracking-widest">Falla Detectada</span>
+                  <p className="text-lg font-bold text-white mt-1">{iaResult.falla_probable}</p>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                   <div className="bg-zinc-950 border border-zinc-800 p-4 rounded-xl">
+                    <span className="text-[10px] text-green-500 font-black uppercase tracking-widest">Presupuesto Sugerido</span>
+                    <p className="text-xl font-black text-green-400 mt-1">{iaResult.costo_estimado_mxn}</p>
+                  </div>
+                  <div className="bg-zinc-950 border border-zinc-800 p-4 rounded-xl">
+                    <span className="text-[10px] text-red-500 font-black uppercase tracking-widest">Nivel de Dificultad</span>
+                    <p className="text-lg font-bold text-white mt-1">{iaResult.nivel_dificultad}</p>
+                  </div>
+                </div>
+                <div className="bg-zinc-950 border border-zinc-800 p-4 rounded-xl">
+                  <span className="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Explicación Profesional al Cliente</span>
+                  <p className="text-zinc-300 mt-2 text-sm italic">"{iaResult.recomendacion_cliente}"</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const VistaCatalogo = () => {
+    const sembrarCatalogoMX = async () => {
+      setLoading(true);
+      const dataBase = [
+        // APPLE
+        { marca: 'Apple', modelo: 'iPhone 11', reparacion: 'Cambio de Pantalla (Incell)', costo: 450, precio: 950 },
+        { marca: 'Apple', modelo: 'iPhone 11', reparacion: 'Cambio de Batería', costo: 250, precio: 600 },
+        { marca: 'Apple', modelo: 'iPhone 12 / 12 Pro', reparacion: 'Cambio de Pantalla (OLED)', costo: 800, precio: 1800 },
+        { marca: 'Apple', modelo: 'iPhone 12 / 12 Pro', reparacion: 'Cambio de Batería', costo: 350, precio: 800 },
+        { marca: 'Apple', modelo: 'iPhone 13', reparacion: 'Cambio de Pantalla (OLED)', costo: 1200, precio: 2500 },
+        { marca: 'Apple', modelo: 'iPhone 13 Pro Max', reparacion: 'Cambio de Pantalla (OLED)', costo: 2500, precio: 4500 },
+        { marca: 'Apple', modelo: 'iPhone 14 Pro Max', reparacion: 'Cambio Cristal Trasero (Láser)', costo: 300, precio: 1800 },
+        { marca: 'Apple', modelo: 'Todos (FaceID)', reparacion: 'Reparación Face ID (Micro soldadura)', costo: 400, precio: 1200 },
+        
+        // SAMSUNG
+        { marca: 'Samsung', modelo: 'Galaxy A14 / A15', reparacion: 'Cambio de Pantalla', costo: 350, precio: 850 },
+        { marca: 'Samsung', modelo: 'Galaxy A34 / A54', reparacion: 'Cambio de Pantalla', costo: 600, precio: 1500 },
+        { marca: 'Samsung', modelo: 'Galaxy S21 Ultra', reparacion: 'Cambio de Pantalla Original', costo: 3200, precio: 4800 },
+        { marca: 'Samsung', modelo: 'Galaxy S22 Ultra', reparacion: 'Cambio de Pantalla Original', costo: 4000, precio: 5500 },
+        { marca: 'Samsung', modelo: 'Galaxy S23 Ultra', reparacion: 'Cambio de Pantalla Original', costo: 4500, precio: 6200 },
+        { marca: 'Samsung', modelo: 'Serie A y S', reparacion: 'Cambio Pin de Carga (Subplaca)', costo: 150, precio: 600 },
+        
+        // MOTOROLA
+        { marca: 'Motorola', modelo: 'Moto G20 / G22 / G30', reparacion: 'Cambio de Pantalla', costo: 350, precio: 800 },
+        { marca: 'Motorola', modelo: 'Moto G52 / G54', reparacion: 'Cambio de Pantalla', costo: 650, precio: 1300 },
+        { marca: 'Motorola', modelo: 'Moto Edge 30', reparacion: 'Cambio de Pantalla (OLED)', costo: 1800, precio: 2800 },
+        { marca: 'Motorola', modelo: 'Varios', reparacion: 'Cambio de Batería', costo: 250, precio: 600 },
+
+        // XIAOMI
+        { marca: 'Xiaomi', modelo: 'Redmi Note 10 / 11', reparacion: 'Cambio de Pantalla (OLED)', costo: 700, precio: 1400 },
+        { marca: 'Xiaomi', modelo: 'Redmi Note 12 / 13', reparacion: 'Cambio de Pantalla', costo: 650, precio: 1300 },
+        { marca: 'Xiaomi', modelo: 'Poco X3 Pro', reparacion: 'Reballing CPU (Muerte Súbita)', costo: 300, precio: 1200 },
+        { marca: 'Xiaomi', modelo: 'Poco X3 / X4', reparacion: 'Cambio de Pantalla', costo: 450, precio: 950 },
+
+        // SERVICIOS GENERALES
+        { marca: 'General', modelo: 'Cualquier Android', reparacion: 'Flasheo / Quitar Cuenta Google (FRP)', costo: 0, precio: 450 },
+        { marca: 'General', modelo: 'Cualquier iPhone', reparacion: 'Restauración / Modo DFU', costo: 0, precio: 300 },
+        { marca: 'General', modelo: 'Varios Modelos', reparacion: 'Baño Químico (Equipo Mojado)', costo: 100, precio: 800 },
+        { marca: 'General', modelo: 'Varios Modelos', reparacion: 'Mantenimiento Preventivo / Limpieza', costo: 50, precio: 350 },
+      ];
+      try {
+        const batch = writeBatch(db);
+        const catRef = collection(db, 'catalogo');
+        dataBase.forEach(item => batch.set(doc(catRef), { ...item, fechaRegistro: Date.now() }));
+        await batch.commit();
+        showToast("Catálogo base importado correctamente.", "success");
+      } catch (e) { showToast("Error al importar.", "error"); } finally { setLoading(false); }
+    };
+
+    return (
+      <div className="h-full flex flex-col animate-fade-in">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-white flex items-center gap-2"><Database className="text-orange-500" /> Precios de Mercado</h2>
+          <button onClick={sembrarCatalogoMX} className="bg-zinc-800 hover:bg-zinc-700 text-white px-4 py-2 rounded-xl text-xs font-bold border border-zinc-700 transition-colors flex items-center gap-2">
+            <Sparkles size={14} className="text-orange-400"/> Importar Base México
+          </button>
+        </div>
+        
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden flex-1 shadow-lg">
+          <div className="overflow-x-auto h-full custom-scrollbar">
+            <table className="w-full text-left border-collapse text-sm">
+              <thead className="bg-zinc-950 sticky top-0 z-10 shadow-sm border-b border-zinc-800">
+                <tr>
+                  <th className="p-4 text-xs font-black uppercase tracking-widest text-zinc-500">Modelo</th>
+                  <th className="p-4 text-xs font-black uppercase tracking-widest text-zinc-500">Reparación</th>
+                  <th className="p-4 text-xs font-black uppercase tracking-widest text-zinc-500 text-right">Costo Base</th>
+                  <th className="p-4 text-xs font-black uppercase tracking-widest text-zinc-500 text-right">Cobro Cliente</th>
+                  <th className="p-4 text-xs font-black uppercase tracking-widest text-zinc-500 text-center">Utilidad</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-800/50">
+                {catalogo.map(item => {
+                  const utilidad = item.precio - item.costo;
+                  const margen = Math.round((utilidad / item.precio) * 100) || 0;
+                  return (
+                    <tr key={item.id} className="hover:bg-zinc-800/30 transition-colors">
+                      <td className="p-4"><div className="font-bold text-white">{item.modelo}</div><div className="text-xs text-zinc-500">{item.marca}</div></td>
+                      <td className="p-4 text-zinc-300 font-medium">{item.reparacion}</td>
+                      <td className="p-4 text-right text-zinc-400 font-mono">{formatCurrency(item.costo)}</td>
+                      <td className="p-4 text-right font-black text-green-400 font-mono">{formatCurrency(item.precio)}</td>
+                      <td className="p-4 text-center">
+                        <span className="px-2.5 py-1 rounded-md text-[10px] font-black tracking-wider bg-green-500/10 text-green-400 border border-green-500/20">{margen}% MARGEN</span>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+            {catalogo.length === 0 && <div className="p-12 text-center text-zinc-500 text-sm">Sin servicios registrados. Importa la base comercial.</div>}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const InputForm = ({ label, name, type="text", req=true, extra="", placeholder="" }) => (
+    <div>
+      <label className="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-1">{label}</label>
+      <input type={type} name={name} required={req} placeholder={placeholder} className={`w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white focus:border-orange-500 outline-none transition-all text-sm ${extra}`} />
+    </div>
+  );
+
+  const ModalNuevaReparacion = () => {
+    const [fotoBase64, setFotoBase64] = useState(null);
+    const [firmaBase64, setFirmaBase64] = useState(null);
+    const folioAuto = "IR-" + Math.floor(1000 + Math.random() * 9000);
+
+    const handlePhoto = async (e) => {
+      const file = e.target.files[0];
+      if (file) setFotoBase64(await compressImage(file));
+    };
+
+    const onSubmit = (e) => {
+      const formData = new FormData(e.target);
+      // Validaciones básicas de Fixora
+      if(!formData.get('notasCondicion')) { showToast("Debes escribir la condición física del equipo.", "error"); return; }
+      
+      const cliente = clientes.find(c => c.id === formData.get('clienteId'));
+      const extraData = { estado: 'Recibido', clienteNombre: cliente?.nombre || 'General', clienteTelefono: cliente?.telefono || '', foto: fotoBase64, firma: firmaBase64, fechaRecepcion: Date.now() };
+      handleSubmitGenerico(e, 'reparaciones', extraData, setShowNuevaReparacion);
+    };
+
+    return (
+      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
+        <div className="bg-zinc-900 rounded-2xl w-full max-w-2xl shadow-2xl border border-zinc-800 max-h-[90vh] flex flex-col overflow-hidden">
+          <div className="flex justify-between items-center p-6 border-b border-zinc-800 bg-zinc-900/80 backdrop-blur shrink-0">
+            <h3 className="text-lg font-black text-white flex items-center gap-2"><CheckCircle className="text-orange-500" size={20}/> Ingreso de Equipo</h3>
+            <button onClick={() => setShowNuevaReparacion(false)} className="text-zinc-500 hover:text-white transition-colors"><X size={20}/></button>
+          </div>
+          
+          <div className="p-6 overflow-y-auto custom-scrollbar bg-zinc-950/30">
+            <form id="form-reparacion" onSubmit={onSubmit} className="space-y-6">
+              {/* Sección 1: Datos */}
+              <div className="bg-zinc-900 p-5 rounded-xl border border-zinc-800 space-y-4">
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-orange-500 mb-2 border-b border-zinc-800 pb-2">Paso 1: Datos Generales</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <InputForm label="Folio Interno" name="folio" defaultValue={folioAuto} extra="font-mono text-orange-400 bg-zinc-950/50" />
+                  <div>
+                    <label className="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-1">Cliente</label>
+                    <select name="clienteId" required className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white outline-none focus:border-orange-500 text-sm">
+                      <option value="">Seleccionar...</option>
+                      {clientes.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <InputForm label="Marca" name="marca" placeholder="Samsung" />
+                  <InputForm label="Modelo" name="modelo" placeholder="A54" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-1">Falla Reportada</label>
+                  <textarea name="falla" required rows="2" className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-sm outline-none focus:border-orange-500 resize-none"></textarea>
+                </div>
+                <InputForm label="Cotización Previa ($)" name="presupuesto" type="number" req={false} />
+              </div>
+
+              {/* Sección 2: Evidencia */}
+              <div className="bg-zinc-900 p-5 rounded-xl border border-zinc-800 space-y-4">
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-orange-500 mb-2 border-b border-zinc-800 pb-2">Paso 2: Evidencia Legal</h4>
+                <div>
+                  <label className="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-1">Condición Física de Ingreso</label>
+                  <input type="text" name="notasCondicion" required placeholder="Ej. Pantalla estrellada, sin bandeja SIM, tapa rota" className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-white text-sm outline-none focus:border-orange-500" />
+                  <p className="text-[10px] text-zinc-500 mt-1 font-bold">Si no está escrito aquí o en foto, el taller no se hace responsable.</p>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-zinc-400 uppercase tracking-widest mb-2 flex items-center gap-2"><Camera size={14}/> Foto del Equipo</label>
+                  {fotoBase64 ? (
+                    <div className="relative inline-block border border-zinc-700 rounded-xl overflow-hidden shadow-lg">
+                      <img src={fotoBase64} alt="Evidencia" className="h-32 object-cover" />
+                      <button type="button" onClick={() => setFotoBase64(null)} className="absolute top-2 right-2 bg-red-500 text-white rounded-lg p-1.5 shadow-lg"><X size={14}/></button>
+                    </div>
+                  ) : (
+                    <input type="file" accept="image/*" capture="environment" onChange={handlePhoto} className="w-full text-sm text-zinc-400 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-zinc-800 file:text-white hover:file:bg-zinc-700 cursor-pointer border border-dashed border-zinc-700 rounded-xl p-4 text-center bg-zinc-950/50" />
+                  )}
+                </div>
+              </div>
+
+              {/* Sección 3: Firma */}
+              <div className="bg-zinc-900 p-5 rounded-xl border border-zinc-800 space-y-3">
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-orange-500 mb-2 border-b border-zinc-800 pb-2">Paso 3: Aceptación del Cliente</h4>
+                <p className="text-xs text-zinc-400">Pide al cliente que firme el recuadro aceptando los términos y el estado del equipo.</p>
+                <SignaturePad onEnd={(data) => setFirmaBase64(data)} />
+              </div>
+            </form>
+          </div>
+          
+          <div className="p-6 border-t border-zinc-800 shrink-0 flex justify-end gap-3 bg-zinc-900">
+            <button onClick={() => setShowNuevaReparacion(false)} className="px-5 py-2.5 text-zinc-400 hover:text-white rounded-xl text-sm font-bold transition-colors">Cancelar</button>
+            <button type="submit" form="form-reparacion" className="px-8 py-2.5 bg-orange-500 hover:bg-orange-400 text-white rounded-xl text-sm font-bold shadow-lg shadow-orange-500/20 transition-all flex items-center gap-2">
+              <CheckCircle size={18}/> Crear Expediente
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const ModalDetalleTicket = () => {
+    if (!selectedTicket) return null;
+    const rep = selectedTicket;
+
+    return (
+      <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
+        <div className="bg-zinc-900 rounded-2xl w-full max-w-4xl shadow-2xl border border-zinc-800 max-h-[90vh] flex flex-col overflow-hidden">
+          <div className="flex justify-between items-center p-6 border-b border-zinc-800 bg-zinc-900/80 backdrop-blur">
+            <h3 className="text-xl font-black text-white flex items-center gap-3">
+              Expediente {rep.folio}
+            </h3>
+            <button onClick={() => setSelectedTicket(null)} className="text-zinc-500 hover:text-white transition-colors"><X size={20}/></button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-6 flex gap-6 flex-col md:flex-row custom-scrollbar bg-zinc-950/30">
+            <div className="flex-1 space-y-6">
+              {/* Resumen Card */}
+              <div className="bg-zinc-900 p-6 rounded-xl border border-zinc-800 shadow-lg relative overflow-hidden">
+                <div className="absolute left-0 top-0 w-1 h-full bg-orange-500"></div>
+                <div className="flex justify-between items-start mb-6">
+                  <div>
+                    <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Cliente / Propietario</p>
+                    <p className="text-2xl font-black text-white">{rep.clienteNombre}</p>
+                    <p className="text-sm text-zinc-400 font-mono mt-1 flex items-center gap-1.5"><Smartphone size={14}/> {rep.clienteTelefono || 'Sin teléfono'}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-2">Estatus Actual</p>
+                    <span className="text-xs font-bold uppercase tracking-wider px-3 py-1.5 bg-zinc-800 text-white rounded border border-zinc-700">{rep.estado}</span>
+                  </div>
+                </div>
+                
+                <div className="border-t border-zinc-800/50 pt-5 mb-5 flex justify-between items-center">
+                  <div>
+                    <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Equipo Ingresado</p>
+                    <p className="text-lg font-bold text-white">{rep.marca} {rep.modelo}</p>
+                  </div>
+                  <div className="text-right">
+                     <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest mb-1">Presupuesto</p>
+                     <p className="text-xl font-black text-green-400 font-mono">{formatCurrency(rep.presupuesto)}</p>
+                  </div>
+                </div>
+
+                <div className="bg-zinc-950/50 p-4 rounded-xl border border-zinc-800 mb-4">
+                  <p className="text-[10px] font-black text-zinc-500 uppercase tracking-widest flex items-center gap-1.5 mb-2"><Wrench size={12}/> Falla Reportada</p>
+                  <p className="text-sm text-zinc-300 leading-relaxed font-medium">{rep.falla}</p>
+                </div>
+                
+                <div className="bg-orange-500/5 p-4 rounded-xl border border-orange-500/20">
+                  <p className="text-[10px] font-black text-orange-500 uppercase tracking-widest flex items-center gap-1.5 mb-2"><AlertCircle size={12}/> Condición Física Registrada</p>
+                  <p className="text-sm text-orange-200/80 font-medium italic">{rep.notasCondicion}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="w-full md:w-80 flex flex-col gap-6">
+              {/* Fotos y Firmas */}
+              <div className="bg-zinc-900 p-5 rounded-xl border border-zinc-800 shadow-lg">
+                <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest flex items-center gap-1.5 mb-3"><Camera size={14}/> Evidencia Fotográfica</h4>
+                {rep.foto ? (
+                  <img src={rep.foto} alt="Evidencia" className="w-full rounded-lg border border-zinc-800" />
+                ) : (
+                  <div className="bg-zinc-950 p-4 rounded-lg text-center border border-dashed border-zinc-800 text-zinc-600 text-[10px] font-bold uppercase"><ImageIcon size={18} className="mx-auto mb-1"/> Sin foto</div>
+                )}
+                <div className="border-t border-zinc-800/50 my-4"></div>
+                <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest flex items-center gap-1.5 mb-3"><PenTool size={14}/> Firma Aceptación</h4>
+                {rep.firma ? (
+                  <div className="bg-white rounded-lg p-2"><img src={rep.firma} alt="Firma" className="w-full" /></div>
+                ) : (
+                  <p className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest text-center py-4 bg-zinc-950 rounded-lg border border-zinc-800">No firmó</p>
+                )}
+              </div>
+
+              {/* Acciones */}
+              <div className="bg-zinc-900 p-5 rounded-xl border border-zinc-800 flex flex-col gap-2.5 shadow-lg">
+                <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1">Comunicaciones Automáticas</h4>
+                <button onClick={() => enviarWhatsApp('ingreso', rep)} className="w-full flex items-center justify-center gap-2 bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#25D366] py-2.5 rounded-lg text-xs font-bold transition-colors border border-[#25D366]/20">
+                  <MessageCircle size={16}/> Enviar Ticket Ingreso
+                </button>
+                <button onClick={() => enviarWhatsApp('cotizacion', rep)} className="w-full flex items-center justify-center gap-2 bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#25D366] py-2.5 rounded-lg text-xs font-bold transition-colors border border-[#25D366]/20">
+                  <MessageCircle size={16}/> Enviar Cotización
+                </button>
+                <button onClick={() => enviarWhatsApp('entrega', rep)} className="w-full flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#25D366]/90 text-white py-2.5 rounded-lg text-xs font-bold transition-colors shadow-lg shadow-[#25D366]/20">
+                  <MessageCircle size={16}/> Avisar Listo para Entrega
+                </button>
+                
+                <div className="border-t border-zinc-800 my-2"></div>
+                
+                <button onClick={() => { setTicketToPrint(rep); setSelectedTicket(null); }} className="w-full flex items-center justify-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-white py-3 rounded-lg text-xs font-bold transition-colors border border-zinc-600">
+                  <Printer size={16}/> Imprimir Ticket PDF
+                </button>
+                <button onClick={() => { eliminarDocumento('reparaciones', rep.id); setSelectedTicket(null); }} className="w-full text-center text-[10px] text-red-500 hover:text-red-400 font-black tracking-widest uppercase mt-2 py-2">
+                  Borrar Registro
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const VistaImpresion = () => {
+    if (!ticketToPrint) return null;
+    const rep = ticketToPrint;
+    return (
+      <div className="hidden print:block fixed inset-0 bg-white z-[9999] p-8 font-sans text-black">
+        <div className="max-w-4xl mx-auto border border-black p-10 relative">
+          
+          {/* Encabezado Corporativo */}
+          <div className="flex justify-between items-end border-b-2 border-black pb-6 mb-8">
+            <div className="flex items-center gap-4">
+                 <div className="w-16 h-16 bg-black text-white font-black flex items-center justify-center text-3xl tracking-tighter rounded-xl">DR</div>
+                 <div>
+                   <h1 className="text-4xl font-black uppercase tracking-tight leading-none mb-1">Taller de la Rosa</h1>
+                   <p className="text-sm font-bold text-gray-600 tracking-widest uppercase">Centro de Servicio Técnico Especializado</p>
+                 </div>
+            </div>
+            <div className="text-right">
+              <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-1">Orden de Servicio</p>
+              <div className="text-4xl font-mono font-black tracking-widest bg-gray-100 px-4 py-2 border border-gray-300">{rep.folio}</div>
+              <p className="text-xs mt-2 font-bold uppercase">{new Date(rep.fechaRecepcion).toLocaleString('es-MX')}</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-8 mb-8">
+            <div>
+              <p className="font-bold border-b border-black mb-2 uppercase text-[10px] tracking-widest text-gray-500">Datos del Propietario</p>
+              <p className="font-black text-xl">{rep.clienteNombre}</p>
+              <p className="text-sm mt-1 font-mono font-bold">Cel: {rep.clienteTelefono || 'No proporcionado'}</p>
+            </div>
+            <div>
+              <p className="font-bold border-b border-black mb-2 uppercase text-[10px] tracking-widest text-gray-500">Equipo Recibido</p>
+              <p className="font-black text-xl">{rep.marca} {rep.modelo}</p>
+            </div>
+          </div>
+
+          <div className="mb-6 bg-gray-50 p-4 border border-gray-300">
+            <p className="font-bold uppercase text-[10px] tracking-widest text-gray-500 mb-2">Falla Reportada por el Cliente</p>
+            <p className="text-sm font-bold">{rep.falla}</p>
+          </div>
+
+          <div className="border-l-4 border-black pl-4 mb-8">
+            <p className="font-bold uppercase text-[10px] tracking-widest text-gray-500 mb-1">Condición Física Aceptada (Observaciones)</p>
+            <p className="text-sm font-bold italic text-gray-800">{rep.notasCondicion}</p>
+          </div>
+
+          {rep.foto && (
+            <div className="mb-8 border border-gray-300 p-2 inline-block">
+              <p className="font-bold border-b border-gray-300 mb-2 uppercase text-[10px] tracking-widest text-gray-500 pb-1">Evidencia Fotográfica de Ingreso</p>
+              <img src={rep.foto} alt="Evidencia" className="max-h-48 grayscale" />
+            </div>
+          )}
+
+          {/* Términos Legales de Alta Fiabilidad */}
+          <div className="mt-12 text-[9px] text-justify text-gray-600 border-t border-gray-300 pt-6 leading-relaxed font-medium">
+             <p className="font-bold text-[10px] text-black uppercase mb-2">Términos y Condiciones del Servicio</p>
+             <p>1. Toda revisión genera un costo de diagnóstico en caso de no autorizar la reparación. 2. El taller "Taller de la Rosa" no se hace responsable por fallas ocultas o no reportadas durante el ingreso del equipo. 3. Los equipos mojados o golpeados severamente corren riesgo de muerte súbita durante la revisión, el cliente asume este riesgo. 4. Todo detalle estético o físico del equipo debe estar documentado en la "Condición Física Aceptada"; si un detalle no está escrito en este documento al momento de la recepción, se asume que no existía y el taller no se hace responsable por reclamos posteriores. 5. Después de 30 días de notificada la reparación, el equipo causará honorarios de almacenaje. Después de 90 días, el equipo pasará a ser propiedad del taller para recuperar costos de refacciones y mano de obra.</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-16 mt-16">
+            <div className="text-center flex flex-col items-center">
+              <div className="h-20 flex items-end justify-center mb-2 w-full border-b border-black">
+                {rep.firma && <img src={rep.firma} alt="Firma" className="max-h-16" />}
+              </div>
+              <p className="font-black text-xs uppercase tracking-widest">Firma de Conformidad</p>
+              <p className="text-[9px] text-gray-500 mt-1 uppercase font-bold">Cliente acepta términos, condiciones y estado físico</p>
+            </div>
+            <div className="text-center flex flex-col items-center">
+              <div className="h-20 w-full border-b border-black"></div>
+              <p className="font-black text-xs uppercase tracking-widest mt-2">Firma Recepción</p>
+              <p className="text-[9px] text-gray-500 mt-1 uppercase font-bold">Taller de la Rosa</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  if (loading) return <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center text-white"><div className="w-16 h-16 bg-orange-500 rounded-2xl flex items-center justify-center mb-6 animate-pulse shadow-[0_0_30px_rgba(249,115,22,0.5)]"><span className="text-3xl font-black">DR</span></div><p className="text-zinc-500 font-bold tracking-widest uppercase text-[10px] animate-pulse">Iniciando ERP Enterprise...</p></div>;
+
+  if (configError) {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center text-white p-6 animate-fade-in">
+        <AlertCircle size={64} className="text-red-500 mb-6" />
+        <h1 className="text-3xl font-black mb-3 text-center">Falta configurar Firebase</h1>
+        <p className="text-zinc-400 text-center max-w-lg mb-6 leading-relaxed">
+          El sistema intentó conectarse a la base de datos en la nube, pero detectó las credenciales de ejemplo <code className="text-orange-400 font-mono">"TU_API_KEY"</code>.<br/><br/>
+          Sigue las instrucciones del chat para crear tu proyecto gratuito en <b>Firebase</b> y reemplaza las claves en las primeras líneas del código para que el sistema vuelva a funcionar.
+        </p>
+      </div>
+    );
+  }
+
+  if (permissionError) {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center text-white p-6 animate-fade-in">
+        <ShieldCheck size={72} className="text-orange-500 mb-6" />
+        <h1 className="text-3xl font-black mb-3 text-center">Permisos de Base de Datos Denegados</h1>
+        <div className="bg-zinc-900 border border-zinc-800 p-8 rounded-2xl max-w-2xl text-zinc-300 space-y-4 shadow-2xl">
+          <p>Tu ERP se ha conectado exitosamente a Firebase, pero <b>la base de datos está bloqueando la lectura y escritura</b> por reglas de seguridad.</p>
+          <p className="font-bold text-white mt-4">Sigue estos 4 pasos exactos para solucionarlo:</p>
+          <ol className="list-decimal pl-5 space-y-3 text-sm font-medium">
+            <li>Ve a tu <a href="https://console.firebase.google.com/" target="_blank" rel="noreferrer" className="text-orange-400 underline hover:text-orange-300">Consola de Firebase</a> y entra a tu proyecto.</li>
+            <li>En el menú lateral izquierdo, haz clic en <b>Firestore Database</b> (Asegúrate de NO elegir "Realtime Database").</li>
+            <li>En la parte superior, haz clic en la pestaña <b>Reglas (Rules)</b>.</li>
+            <li>Borra absolutamente todo el texto que veas en ese cuadro y pega <b>exactamente</b> el código de abajo:</li>
+          </ol>
+          <div className="relative mt-4">
+            <pre className="bg-black p-4 rounded-xl text-green-400 text-sm font-mono overflow-x-auto border border-zinc-800 selection:bg-green-900">
+{`rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}`}
+            </pre>
+          </div>
+          <p className="text-sm mt-4">Finalmente, haz clic en el botón azul <b>Publicar</b>. Una vez hecho, recarga esta página y el sistema funcionará al 100%.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#09090b] text-zinc-100 flex flex-col md:flex-row font-sans selection:bg-orange-500/30 overflow-hidden relative">
+      <style dangerouslySetInnerHTML={{__html: `
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #52525b; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @media print { body * { visibility: hidden; } .print\\:block, .print\\:block * { visibility: visible; } .print\\:block { position: absolute; left: 0; top: 0; width: 100%; } }
+      `}} />
+
+      {/* Sistema Toast UI */}
+      {toastMsg && (
+        <div className={`fixed bottom-6 right-6 z-[9999] px-6 py-4 rounded-xl shadow-2xl border flex items-center gap-3 font-bold text-sm animate-fade-in ${toastMsg.tipo === 'error' ? 'bg-red-950/90 border-red-900 text-red-200' : toastMsg.tipo === 'success' ? 'bg-green-950/90 border-green-900 text-green-200' : 'bg-zinc-900/90 border-zinc-800 text-white'}`}>
+          {toastMsg.tipo === 'error' ? <AlertCircle size={18}/> : toastMsg.tipo === 'success' ? <CheckCircle size={18}/> : <Activity size={18}/>}
+          {toastMsg.mensaje}
+        </div>
+      )}
+      
+      {/* Sidebar Enterprise */}
+      <nav className="w-full md:w-64 bg-zinc-950/80 backdrop-blur-xl border-r border-zinc-800/80 flex flex-col relative z-10 print:hidden shadow-2xl">
+        <div className="p-6 flex items-center gap-3 border-b border-zinc-800/80">
+          <div className="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/20 border border-orange-400/20 shrink-0">
+            <span className="text-white font-black text-xl tracking-tighter">DR</span>
+          </div>
+          <div>
+             <h1 className="text-xl font-black text-white tracking-tight leading-none">de la Rosa</h1>
+             <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">Enterprise ERP</span>
+          </div>
+        </div>
+        
+        <div className="flex-1 py-6 px-3 flex flex-col gap-1 overflow-y-auto custom-scrollbar">
+          <p className="text-[10px] text-zinc-600 font-black uppercase tracking-widest px-3 mb-2">Operación</p>
+          <NavBtn tab="dashboard" icon={LayoutDashboard} label="Dashboard" current={activeTab} set={setActiveTab} />
+          <NavBtn tab="reparaciones" icon={Terminal} label="Kanban Taller" current={activeTab} set={setActiveTab} />
+          <NavBtn tab="clientes" icon={Users} label="Directorio" current={activeTab} set={setActiveTab} />
+          
+          <p className="text-[10px] text-zinc-600 font-black uppercase tracking-widest px-3 mt-6 mb-2">Administración</p>
+          <NavBtn tab="catalogo" icon={Database} label="Catálogo / Precios" current={activeTab} set={setActiveTab} />
+          <NavBtn tab="inventario" icon={Package} label="Inventario Stock" current={activeTab} set={setActiveTab} />
+          
+          <p className="text-[10px] text-zinc-600 font-black uppercase tracking-widest px-3 mt-6 mb-2">Avanzado</p>
+          <button onClick={() => setActiveTab('ia')} className={`flex items-center gap-3 w-full p-3 rounded-xl text-sm font-bold transition-all ${activeTab === 'ia' ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200 border border-transparent'}`}>
+            <BrainCircuit size={18} /><span>Diagnóstico IA</span>
+          </button>
+        </div>
+      </nav>
+
+      {/* Area Central de Contenido */}
+      <main className="flex-1 p-4 md:p-8 overflow-hidden h-screen flex flex-col relative z-0 print:hidden bg-zinc-950/30">
+        {activeTab === 'dashboard' && <VistaDashboard />}
+        {activeTab === 'reparaciones' && <VistaReparaciones />}
+        {activeTab === 'catalogo' && <VistaCatalogo />}
+        {activeTab === 'ia' && <AsistenteIA />}
+        
+        {/* Modulos Clientes e Inventario Simplificados para no saturar */}
+        {activeTab === 'clientes' && (
+          <div className="h-full flex flex-col animate-fade-in">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-white flex items-center gap-2"><Users className="text-orange-500"/> Directorio</h2>
+              <button onClick={() => setShowNuevoCliente(true)} className="bg-orange-500 hover:bg-orange-400 text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-orange-500/20"><PlusCircle size={18} className="inline mr-2"/>Nuevo Cliente</button>
+            </div>
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl flex-1 p-4 overflow-y-auto">
+              {clientes.map(c => <div key={c.id} className="p-4 bg-zinc-950/50 border border-zinc-800/80 rounded-xl mb-3 flex justify-between items-center hover:border-orange-500/30"><div className="font-bold">{c.nombre}<p className="text-xs text-zinc-500 font-mono mt-1">{c.telefono}</p></div><span className="text-[10px] bg-zinc-800 px-2 py-1 rounded font-bold text-zinc-400 uppercase">Cliente</span></div>)}
+              {clientes.length === 0 && <p className="text-center text-zinc-500 py-10 text-sm">Directorio vacío.</p>}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'inventario' && (
+          <div className="h-full flex flex-col animate-fade-in">
+             <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-white flex items-center gap-2"><Package className="text-orange-500"/> Stock de Refacciones</h2>
+              <button onClick={() => setShowNuevoArticulo(true)} className="bg-orange-500 hover:bg-orange-400 text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-lg shadow-orange-500/20"><PlusCircle size={18} className="inline mr-2"/>Añadir Pieza</button>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 overflow-y-auto pr-2 custom-scrollbar">
+              {inventario.map(item => (
+                <div key={item.id} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex flex-col relative overflow-hidden group">
+                  {item.cantidad <= 2 && <div className="absolute top-0 left-0 w-full h-1 bg-red-500"></div>}
+                  <div className="flex justify-between items-start mb-4">
+                    <h3 className="text-sm font-bold text-white leading-tight">{item.nombre}</h3>
+                    <button onClick={() => eliminarDocumento('inventario', item.id)} className="text-zinc-600 hover:text-red-500 opacity-0 group-hover:opacity-100"><X size={14}/></button>
+                  </div>
+                  <div className="mt-auto flex items-center justify-between bg-zinc-950 p-2 rounded-xl border border-zinc-800/50">
+                    <button onClick={() => actualizarStock(item.id, item.cantidad, -1)} className="w-8 h-8 bg-zinc-900 rounded text-zinc-400 font-bold hover:text-white">-</button>
+                    <div className="text-center leading-none"><span className={`font-black text-xl ${item.cantidad===0?'text-red-500':'text-white'}`}>{item.cantidad}</span></div>
+                    <button onClick={() => actualizarStock(item.id, item.cantidad, 1)} className="w-8 h-8 bg-zinc-900 rounded text-zinc-400 font-bold hover:text-white">+</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* Renderizado de Modales Globales */}
+      {showNuevaReparacion && <ModalNuevaReparacion />}
+      <ModalDetalleTicket />
+      <VistaImpresion />
+
+      {/* Modal Nuevo Cliente Simplificado */}
+      {showNuevoCliente && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-zinc-900 border border-zinc-800 p-8 rounded-2xl w-full max-w-sm">
+            <h3 className="text-lg font-black text-white mb-6">Nuevo Cliente</h3>
+            <form onSubmit={(e) => handleSubmitGenerico(e, 'clientes', {}, setShowNuevoCliente)} className="space-y-4">
+              <InputForm label="Nombre Completo" name="nombre" />
+              <InputForm label="Teléfono (WhatsApp)" name="telefono" type="tel" />
+              <div className="flex justify-end gap-3 pt-4"><button type="button" onClick={() => setShowNuevoCliente(false)} className="px-5 py-2.5 text-xs font-bold text-zinc-400">Cancelar</button><button type="submit" className="px-6 py-2.5 bg-orange-500 text-white rounded-xl text-xs font-bold">Guardar</button></div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Nuevo Articulo Simplificado */}
+      {showNuevoArticulo && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-zinc-900 border border-zinc-800 p-8 rounded-2xl w-full max-w-sm">
+            <h3 className="text-lg font-black text-white mb-6">Añadir Refacción</h3>
+            <form onSubmit={(e) => handleSubmitGenerico(e, 'inventario', {}, setShowNuevoArticulo)} className="space-y-4">
+              <InputForm label="Nombre" name="nombre" placeholder="Pantalla iPhone 11" />
+              <div className="grid grid-cols-2 gap-4"><InputForm label="Stock Inicial" name="cantidad" type="number" /><InputForm label="Costo $" name="precioCompra" type="number" extra="step='0.01'" /></div>
+              <div className="flex justify-end gap-3 pt-4"><button type="button" onClick={() => setShowNuevoArticulo(false)} className="px-5 py-2.5 text-xs font-bold text-zinc-400">Cancelar</button><button type="submit" className="px-6 py-2.5 bg-orange-500 text-white rounded-xl text-xs font-bold">Guardar</button></div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const NavBtn = ({ tab, icon: Icon, label, current, set }) => {
+  const active = current === tab;
+  return (
+    <button onClick={() => set(tab)} className={`flex items-center gap-3 w-full p-3 rounded-xl text-sm font-bold transition-all ${active ? 'bg-zinc-900 text-white shadow-sm border border-zinc-800/80' : 'text-zinc-500 hover:text-zinc-300 border border-transparent'}`}>
+      <Icon size={18} className={active ? 'text-orange-500' : ''} />
+      <span>{label}</span>
+    </button>
+  );
+};
