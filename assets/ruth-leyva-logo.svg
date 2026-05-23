@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">Ruth Leyva Logo</title>
+  <desc id="desc">Circular emblem with shield, phone and rose icon.</desc>
+  <defs>
+    <linearGradient id="ring" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#103f47"/>
+      <stop offset="100%" stop-color="#173b43"/>
+    </linearGradient>
+    <linearGradient id="shield" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#203c4d"/>
+      <stop offset="55%" stop-color="#183344"/>
+      <stop offset="100%" stop-color="#0d2534"/>
+    </linearGradient>
+    <linearGradient id="phone" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#25445b"/>
+      <stop offset="100%" stop-color="#142b3a"/>
+    </linearGradient>
+    <linearGradient id="rose" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#d03357"/>
+      <stop offset="100%" stop-color="#96152f"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#0a1b22" flood-opacity="0.30"/>
+    </filter>
+  </defs>
+
+  <circle cx="512" cy="512" r="470" fill="#f7f7f7"/>
+  <circle cx="512" cy="512" r="470" fill="none" stroke="url(#ring)" stroke-width="34"/>
+  <circle cx="512" cy="512" r="380" fill="none" stroke="#173b43" stroke-width="16" opacity=".15"/>
+
+  <g filter="url(#shadow)">
+    <path d="M512 146 L732 250 L758 492 C758 646 656 776 512 868 C368 776 266 646 266 492 L292 250 Z" fill="url(#shield)" stroke="#f7f7f7" stroke-width="18" stroke-linejoin="round"/>
+    <path d="M512 182 L694 266 L716 488 C716 618 623 718 512 792 C401 718 308 618 308 488 L330 266 Z" fill="none" stroke="#f7f7f7" stroke-width="10" opacity=".92"/>
+    <path d="M512 214 L618 244 L710 278 L710 478 C710 614 620 714 512 786 C404 714 314 614 314 478 L314 278 L406 244 Z" fill="none" stroke="#0e2431" stroke-width="16" opacity=".55"/>
+
+    <rect x="401" y="224" width="222" height="486" rx="50" fill="url(#phone)" stroke="#f7f7f7" stroke-width="16"/>
+    <rect x="425" y="248" width="174" height="438" rx="36" fill="#2a4a62" opacity=".42"/>
+    <rect x="467" y="248" width="90" height="14" rx="7" fill="#f7f7f7"/>
+    <circle cx="577" cy="255" r="8" fill="#f7f7f7"/>
+    <circle cx="631" cy="356" r="11" fill="#f7f7f7" opacity=".95"/>
+    <circle cx="393" cy="356" r="11" fill="#f7f7f7" opacity=".95"/>
+    <circle cx="393" cy="466" r="11" fill="#f7f7f7" opacity=".95"/>
+    <circle cx="631" cy="466" r="11" fill="#f7f7f7" opacity=".95"/>
+
+    <circle cx="512" cy="458" r="74" fill="none" stroke="url(#rose)" stroke-width="22"/>
+    <path d="M512 392 C556 392 586 420 586 458 C586 492 562 520 512 557 C462 520 438 492 438 458 C438 420 468 392 512 392 Z" fill="url(#rose)"/>
+    <path d="M512 415 C536 415 553 432 553 458 C553 480 538 499 512 520 C486 499 471 480 471 458 C471 432 488 415 512 415 Z" fill="#f7f7f7"/>
+    <path d="M512 470 C540 470 559 487 559 510 C559 527 547 540 527 551 C523 528 518 508 512 490 C506 508 501 528 497 551 C477 540 465 527 465 510 C465 487 484 470 512 470 Z" fill="#b0183b"/>
+    <path d="M502 552 C474 569 453 588 434 615 C472 606 501 600 512 585 C523 600 552 606 590 615 C571 588 550 569 522 552 Z" fill="url(#rose)"/>
+    <path d="M478 570 C451 584 430 598 410 618 C438 621 463 615 484 603 Z" fill="#13394a"/>
+    <path d="M546 570 C573 584 594 598 614 618 C586 621 561 615 540 603 Z" fill="#13394a"/>
+    <path d="M512 596 C512 626 512 654 512 682" fill="none" stroke="#0f3440" stroke-width="12" stroke-linecap="round"/>
+  </g>
+</svg>

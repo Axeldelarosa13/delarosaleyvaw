@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OptiCore helper</title>
+  <style>
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #050814;
+    }
+    iframe {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #050814;
+    }
+  </style>
+</head>
+<body>
+  <iframe id="app" src="/opticore/" referrerpolicy="no-referrer"></iframe>
+  <script>
+    const frame = document.getElementById('app');
+    const session = {
+      username: 'admin',
+      name: 'Admin Central',
+      role: 'Administrador',
+      branch: 'Global'
+    };
+
+    let seeded = false;
+
+    function seedSession() {
+      if (seeded) return;
+      try {
+        const win = frame.contentWindow;
+        if (!win || !win.localStorage) return;
+        win.localStorage.setItem('opti_session_v4', JSON.stringify(session));
+        seeded = true;
+        win.location.reload();
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    frame.addEventListener('load', () => {
+      setTimeout(seedSession, 250);
+    });
+
+    setTimeout(seedSession, 700);
+  </script>
+</body>
+</html>
