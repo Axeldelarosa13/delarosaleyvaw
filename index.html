@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -9,7 +8,7 @@
     <meta property="og:title" content="de la Rosa Leyva | Agencia Digital">
     <meta property="og:description" content="Marketing, diseño web, automatización e IA para marcas que quieren crecer con una presencia digital premium.">
     <meta property="og:type" content="website">
-    <meta property="og:image" content="assets/ruth-leyva-logo.svg">
+    <meta property="og:image" content="./assets/ruth-leyva-logo.svg">
     <meta name="twitter:card" content="summary_large_image">
     <title>de la Rosa Leyva | Agencia Digital</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -498,14 +497,61 @@
         .social-screenshot {
             display: block;
             overflow: hidden;
+            padding: 0.5rem;
+            background:
+                radial-gradient(circle at top left, rgba(0, 240, 255, 0.08), transparent 32%),
+                linear-gradient(145deg, rgba(255,255,255,0.055), rgba(255,255,255,0.015));
         }
 
         .social-screenshot img {
             display: block;
+            width: 100%;
+            height: auto;
+            max-height: 320px;
+            object-fit: contain;
+            object-position: center;
         }
 
         .social-chart {
             overflow: hidden;
+        }
+
+        .social-chart svg {
+            display: block;
+            width: 100%;
+            height: auto;
+            min-height: 220px;
+        }
+
+        .social-impact-card {
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            background: rgba(255, 255, 255, 0.055);
+            border-radius: 1.35rem;
+            padding: 1.25rem;
+        }
+
+        .social-metric-card {
+            border-radius: 0.95rem;
+            padding: 0.72rem 0.85rem;
+            min-height: 0;
+        }
+
+        .social-metric-card .metric-label {
+            font-size: 0.62rem;
+            letter-spacing: 0.13em;
+            margin-bottom: 0.32rem;
+            line-height: 1.2;
+        }
+
+        .social-metric-card .metric-value {
+            font-size: clamp(1.45rem, 3.5vw, 1.9rem);
+            line-height: 1;
+        }
+
+        .social-metric-card .metric-trend {
+            margin-top: 0.32rem;
+            font-size: 0.76rem;
+            line-height: 1.15;
         }
 
         .social-pill {
@@ -615,35 +661,60 @@
             }
 
             .social-screenshot {
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-                scrollbar-width: thin;
-                scrollbar-color: rgba(0, 240, 255, 0.55) rgba(255, 255, 255, 0.08);
+                overflow: hidden;
+                padding: 0.35rem;
             }
 
             .social-screenshot img {
-                width: auto;
-                max-width: none;
-                min-width: 560px;
+                width: 100%;
+                max-width: 100%;
+                min-width: 0;
+                max-height: 210px;
+                object-fit: contain;
             }
 
             .social-chart {
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
+                overflow: hidden;
+                padding: 0.85rem;
             }
 
             .social-chart svg {
-                width: 640px;
-                max-width: none;
+                width: 100%;
+                max-width: 100%;
+                min-height: 170px;
             }
 
             .social-pill {
                 padding: 0.85rem;
             }
 
+            .social-metrics-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            }
+
+            .social-metric-card {
+                padding: 0.62rem 0.7rem !important;
+                border-radius: 0.9rem !important;
+            }
+
+            .social-metric-card .metric-label {
+                font-size: 0.56rem;
+                letter-spacing: 0.1em;
+                margin-bottom: 0.28rem !important;
+            }
+
+            .social-metric-card .metric-value {
+                font-size: 1.35rem !important;
+            }
+
+            .social-metric-card .metric-trend {
+                font-size: 0.75rem !important;
+                margin-top: 0.28rem !important;
+            }
+
             .portfolio-media {
-                min-height: 190px;
-                aspect-ratio: 4 / 3;
+                min-height: 220px;
+                aspect-ratio: 16 / 11;
             }
 
             .case-metric {
@@ -684,11 +755,15 @@
             }
 
             .social-screenshot img {
-                min-width: 500px;
+                max-height: 185px;
             }
 
             .social-chart svg {
-                width: 600px;
+                min-height: 150px;
+            }
+
+            .social-metrics-grid {
+                gap: 0.55rem !important;
             }
         }
 
@@ -713,14 +788,19 @@
         .portfolio-card img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
+            object-position: center;
             display: block;
-            transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.5s ease;
+            transition: filter 0.5s ease;
         }
 
         .portfolio-media {
-            aspect-ratio: 16 / 10;
+            aspect-ratio: 16 / 11;
             min-height: 0;
+            padding: 0.4rem;
+            background:
+                radial-gradient(circle at top left, rgba(0, 240, 255, 0.08), transparent 34%),
+                linear-gradient(145deg, rgba(255,255,255,0.045), rgba(255,255,255,0.015));
         }
 
         .case-body {
@@ -750,8 +830,28 @@
         }
 
         .portfolio-card:hover img {
-            transform: scale(1.08);
-            filter: saturate(1.08) contrast(1.05);
+            filter: saturate(1.08) contrast(1.04);
+        }
+
+        .portfolio-expand-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.55rem;
+            border-radius: 999px;
+            border: 1px solid rgba(0, 240, 255, 0.28);
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.18), rgba(138, 43, 226, 0.18));
+            padding: 0.75rem 1rem;
+            font-weight: 900;
+            color: #ffffff;
+            box-shadow: 0 12px 30px rgba(0, 240, 255, 0.10);
+            transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+        }
+
+        .portfolio-card:hover .portfolio-expand-btn {
+            transform: translateY(-2px);
+            border-color: rgba(0, 240, 255, 0.58);
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.28), rgba(255, 20, 147, 0.22));
         }
 
         .portfolio-card::after {
@@ -801,6 +901,14 @@
 
         .lightbox.show .lightbox-panel {
             transform: translateY(0) scale(1);
+        }
+
+        .lightbox .service-card {
+            max-height: min(84vh, 820px);
+        }
+
+        #lightbox-image {
+            background: #050a12;
         }
 
         .input-field {
@@ -853,6 +961,161 @@
             transform: scale(1.08);
         }
 
+        @media (max-width: 768px) {
+            #portfolio-grid {
+                gap: 1rem;
+            }
+
+            .portfolio-card {
+                border-radius: 1.15rem !important;
+            }
+
+            .portfolio-media {
+                aspect-ratio: 16 / 10;
+                min-height: 175px;
+                max-height: 210px;
+                padding: 0.35rem;
+            }
+
+            .portfolio-card img {
+                object-position: top center;
+            }
+
+            .portfolio-card .case-body {
+                padding: 0.9rem !important;
+            }
+
+            .portfolio-card h3 {
+                font-size: 1.15rem !important;
+                line-height: 1.15 !important;
+                margin-bottom: 0.4rem !important;
+            }
+
+            .portfolio-description {
+                display: none !important;
+            }
+
+            .portfolio-tags {
+                display: flex !important;
+                gap: 0.35rem !important;
+                margin-bottom: 0.75rem !important;
+            }
+
+            .portfolio-tags span {
+                padding: 0.28rem 0.5rem !important;
+                font-size: 0.58rem !important;
+                line-height: 1.15 !important;
+            }
+
+            .portfolio-mini-label {
+                font-size: 0.55rem !important;
+                letter-spacing: 0.18em !important;
+                margin-bottom: 0.15rem !important;
+            }
+
+            .portfolio-impact {
+                display: block !important;
+                padding: 0.72rem !important;
+                border-radius: 0.95rem !important;
+            }
+
+            .portfolio-impact-text {
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                font-size: 0.72rem !important;
+                line-height: 1.35 !important;
+            }
+
+            .portfolio-expand-btn {
+                width: 100%;
+                padding: 0.6rem 0.8rem;
+                font-size: 0.78rem;
+            }
+
+            .portfolio-stack {
+                margin-bottom: 0.4rem !important;
+                gap: 0.35rem !important;
+            }
+
+            .portfolio-stack span {
+                font-size: 0.62rem !important;
+            }
+
+            .portfolio-card .case-metric {
+                padding: 0.55rem;
+                border-radius: 0.85rem;
+            }
+
+            .portfolio-card .case-metric strong {
+                font-size: 0.95rem;
+            }
+
+            .portfolio-card .case-metric span {
+                font-size: 0.68rem;
+            }
+
+            .lightbox {
+                align-items: flex-start;
+                padding: 0.6rem;
+                overflow-y: auto;
+            }
+
+            .lightbox-panel {
+                width: 100%;
+                margin-top: 3.1rem;
+            }
+
+            .lightbox .service-card {
+                max-height: none;
+                border-radius: 1.1rem !important;
+            }
+
+            #lightbox-image {
+                width: 100%;
+                height: auto;
+                max-height: 45vh;
+                object-fit: contain;
+            }
+
+            #lightbox .grid {
+                display: block;
+            }
+
+            #lightbox .space-y-5 {
+                max-height: none;
+                padding: 0.9rem !important;
+            }
+
+            #lightbox-title {
+                font-size: 1.2rem;
+                line-height: 1.15;
+            }
+
+            #lightbox-description {
+                font-size: 0.85rem;
+                line-height: 1.5;
+            }
+
+            #lightbox-close {
+                top: -3rem;
+                right: 0.25rem;
+                font-size: 1.85rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .portfolio-media {
+                min-height: 160px;
+                max-height: 185px;
+            }
+
+            #lightbox-image {
+                max-height: 40vh;
+            }
+        }
+
         @media (prefers-reduced-motion: reduce) {
             html {
                 scroll-behavior: auto;
@@ -881,7 +1144,7 @@
     <nav id="site-nav" class="fixed top-0 w-full z-50 py-3 border-b border-white/10 bg-[#07111f]/70 backdrop-blur-xl">
         <div class="container mx-auto px-4 flex justify-between items-center">
             <a href="#inicio" class="flex items-center gap-3">
-                <img src="assets/ruth-leyva-logo.svg" alt="Logo de la Rosa Leyva" class="h-12 w-12 rounded-full bg-white p-1 shadow-lg hover:scale-105 transition-transform" decoding="async">
+                <img src="./assets/ruth-leyva-logo.svg" alt="Logo de la Rosa Leyva" class="h-12 w-12 rounded-full bg-white p-1 shadow-lg hover:scale-105 transition-transform" decoding="async">
                 <div class="hidden sm:block leading-tight">
                     <p class="text-sm font-black tracking-wide">de la Rosa Leyva</p>
                     <p class="text-[10px] uppercase tracking-[0.35em] text-white/45">Agencia Digital</p>
@@ -1117,95 +1380,38 @@
 
     <section id="ia" class="py-24 relative overflow-hidden">
         <div class="container mx-auto px-4 relative z-10">
-            <div class="grid lg:grid-cols-[0.95fr_1.05fr] gap-12 items-stretch">
-                <div class="reveal">
-                    <div class="service-card rounded-[2rem] p-6 sm:p-8 h-full relative overflow-hidden">
-                        <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(circle at top, rgba(0, 240, 255, 0.14), transparent 34%), radial-gradient(circle at bottom right, rgba(138, 43, 226, 0.12), transparent 30%);"></div>
-                        <div class="relative z-10 flex flex-col h-full gap-6">
-                            <div class="flex items-start justify-between gap-4">
-                                <div>
-                                    <p class="text-[10px] font-black uppercase tracking-[0.35em] text-white/40 mb-3">IA en vivo</p>
-                                    <h2 class="text-4xl sm:text-5xl font-black">Motor adaptativo 24/7</h2>
-                                </div>
-                                <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-400/10 border border-emerald-400/20 text-emerald-300 text-xs font-semibold whitespace-nowrap">
-                                    <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                                    Activo
-                                </span>
-                            </div>
+            <div class="service-card rounded-[2rem] p-7 sm:p-10 reveal relative overflow-hidden">
+                <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#00F0FF] via-[#8A2BE2] to-[#FF1493]"></div>
+                <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(circle at 12% 18%, rgba(0,240,255,0.14), transparent 30%), radial-gradient(circle at 88% 0%, rgba(255,20,147,0.12), transparent 28%);"></div>
+                <div class="relative z-10 grid lg:grid-cols-[1fr_0.9fr] gap-8 lg:gap-12 items-center">
+                    <div>
+                        <div class="section-eyebrow mb-6">Nuestra IA</div>
+                        <h2 class="text-4xl sm:text-5xl font-black mb-6">IA Adaptativa para sitios que atienden mejor.</h2>
+                        <p class="text-lg sm:text-xl text-white/80 max-w-3xl">
+                            Integramos asistentes inteligentes para responder dudas, orientar visitantes y facilitar el contacto sin saturar tu página.
+                        </p>
+                    </div>
 
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
-                                    <p class="text-[10px] uppercase tracking-[0.2em] text-white/45">Respuestas</p>
-                                    <p class="mt-2 text-2xl font-black text-[#00F0FF]">92%</p>
-                                    <p class="text-sm text-white/70 mt-1">Acierto útil</p>
-                                </div>
-                                <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
-                                    <p class="text-[10px] uppercase tracking-[0.2em] text-white/45">Leads</p>
-                                    <p class="mt-2 text-2xl font-black text-[#8A2BE2]">+31%</p>
-                                    <p class="text-sm text-white/70 mt-1">Captación</p>
-                                </div>
-                                <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
-                                    <p class="text-[10px] uppercase tracking-[0.2em] text-white/45">Tiempo</p>
-                                    <p class="mt-2 text-2xl font-black text-[#FF1493]">&lt;6s</p>
-                                    <p class="text-sm text-white/70 mt-1">Respuesta media</p>
-                                </div>
-                            </div>
-
-                            <div class="rounded-[1.75rem] border border-white/10 bg-[#08101d]/90 p-6 flex-1 flex flex-col items-center justify-center text-center relative overflow-hidden">
-                                <div class="absolute inset-0 pointer-events-none" style="background: linear-gradient(135deg, transparent, rgba(0, 240, 255, 0.08) 40%, transparent 75%); animation: scan 8s linear infinite;"></div>
-                                <div class="relative z-10">
-                                    <div class="relative inline-flex items-center justify-center w-40 h-40 sm:w-48 sm:h-48">
-                                        <div class="absolute inset-0 rounded-full bg-gradient-to-br from-[#00F0FF] to-[#8A2BE2] opacity-20 blur-2xl"></div>
-                                        <i class="fas fa-robot text-[6.5rem] sm:text-[7.5rem] text-white floating" style="text-shadow: 0 0 32px rgba(0, 240, 255, 0.75);"></i>
-                                    </div>
-                                    <p class="text-white/70 mt-4 max-w-sm mx-auto">Una IA pensada para guiar, responder y empujar conversiones sin fricción.</p>
-                                </div>
-                            </div>
-
-                            <div class="grid sm:grid-cols-2 gap-4">
-                                <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
-                                    <p class="text-xs uppercase tracking-[0.25em] text-white/45 mb-2">Aprende</p>
-                                    <p class="text-sm text-white/75">Detecta patrones de navegación y prioriza contenido útil en tiempo real.</p>
-                                </div>
-                                <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
-                                    <p class="text-xs uppercase tracking-[0.25em] text-white/45 mb-2">Convierte</p>
-                                    <p class="text-sm text-white/75">Lleva al usuario al siguiente paso con respuestas y CTA claros.</p>
-                                </div>
-                            </div>
+                    <div class="grid sm:grid-cols-3 lg:grid-cols-1 gap-3">
+                        <div class="rounded-2xl border border-white/10 bg-white/[0.055] p-5">
+                            <p class="font-black mb-1">Respuestas rápidas</p>
+                            <p class="text-sm text-white/65">Atención inmediata para preguntas frecuentes.</p>
+                        </div>
+                        <div class="rounded-2xl border border-white/10 bg-white/[0.055] p-5">
+                            <p class="font-black mb-1">Guía comercial</p>
+                            <p class="text-sm text-white/65">Rutas claras hacia WhatsApp, formulario o venta.</p>
+                        </div>
+                        <div class="rounded-2xl border border-white/10 bg-white/[0.055] p-5">
+                            <p class="font-black mb-1">Integración limpia</p>
+                            <p class="text-sm text-white/65">Diseñada para sentirse parte de tu marca.</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="reveal">
-                    <div class="service-card rounded-[2rem] p-6 sm:p-8 h-full">
-                        <h2 class="text-4xl sm:text-5xl font-black mb-6">Presentamos Nuestra <span class="gradient-text">IA Adaptativa</span></h2>
-                        <p class="text-lg sm:text-xl text-white/80 mb-6">
-                            Una inteligencia artificial que se integra con tu web, aprende del comportamiento de tus usuarios y convierte cada visita en una experiencia más útil y más rentable.
-                        </p>
-
-                        <ul class="space-y-4 text-white/85">
-                            <li class="flex items-center"><i class="fas fa-check-circle text-[#00F0FF] mr-3 text-xl"></i><span>Respuestas personalizadas en tiempo real.</span></li>
-                            <li class="flex items-center"><i class="fas fa-check-circle text-[#00F0FF] mr-3 text-xl"></i><span>Análisis de navegación para optimizar conversiones.</span></li>
-                            <li class="flex items-center"><i class="fas fa-check-circle text-[#00F0FF] mr-3 text-xl"></i><span>Captación automática de leads 24/7.</span></li>
-                        </ul>
-
-                        <div class="grid sm:grid-cols-2 gap-4 mt-8">
-                            <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
-                                <p class="text-[10px] uppercase tracking-[0.25em] text-white/45 mb-2">Flujo</p>
-                                <p class="font-bold mb-1">Asistencia guiada</p>
-                                <p class="text-sm text-white/70">Responde y orienta según la intención del visitante.</p>
-                            </div>
-                            <div class="rounded-2xl border border-white/10 bg-white/5 p-4">
-                                <p class="text-[10px] uppercase tracking-[0.25em] text-white/45 mb-2">Datos</p>
-                                <p class="font-bold mb-1">Lectura de comportamiento</p>
-                                <p class="text-sm text-white/70">Detecta páginas, intereses y rutas de conversión.</p>
-                            </div>
-                        </div>
-
-                        <a href="#contacto" class="cta-button inline-flex items-center mt-8 text-white font-bold py-4 px-8 rounded-full">
-                            Implementa la IA en tu web <i class="fas fa-cogs ml-2"></i>
-                        </a>
-                    </div>
+                <div class="relative z-10 mt-8">
+                    <a href="#contacto" class="cta-button inline-flex items-center text-white font-bold py-4 px-8 rounded-full">
+                        Implementa la IA en tu web <i class="fas fa-cogs ml-2"></i>
+                    </a>
                 </div>
             </div>
         </div>
@@ -1248,7 +1454,7 @@
                     <div class="relative z-10">
                         <div class="rounded-[1.75rem] border border-white/10 bg-[#050a12]/70 p-2 mb-6">
                             <a href="https://www.facebook.com/meza.baterias.blancos/" target="_blank" rel="noopener noreferrer" class="social-screenshot relative rounded-[1.35rem] border border-white/10 bg-gradient-to-br from-lime-400/20 to-emerald-950/70" aria-label="Abrir Facebook de Meza Baterías Blancos">
-                                <img src="assets/grupo-meza-facebook.png" alt="Captura real del Facebook de Meza Baterías Blancos" width="1290" height="707" class="relative z-10 w-full h-auto object-cover shadow-[0_0_45px_rgba(74,222,128,0.18)]" loading="lazy" decoding="async">
+                                <img src="./assets/grupo-meza-facebook.png" alt="Captura real del Facebook de Meza Baterías Blancos" width="1290" height="707" class="relative z-10 shadow-[0_0_45px_rgba(74,222,128,0.18)]" loading="lazy" decoding="async">
                             </a>
                         </div>
 
@@ -1293,35 +1499,35 @@
                             </div>
                         </div>
 
-                        <div class="grid md:grid-cols-3 gap-3 mb-5">
-                            <div class="rounded-2xl border border-[#00F0FF]/35 bg-[#00F0FF]/10 p-4">
-                                <div class="flex items-center gap-2 text-[#00F0FF] mb-3">
+                        <div class="social-metrics-grid grid sm:grid-cols-3 gap-2 sm:gap-3 mb-4">
+                            <div class="social-metric-card border border-[#00F0FF]/35 bg-[#00F0FF]/10">
+                                <div class="metric-label flex items-center gap-1.5 text-[#00F0FF]">
                                     <i class="fas fa-eye"></i>
-                                    <p class="text-xs font-bold uppercase tracking-[0.18em]">Visualizaciones</p>
+                                    <p class="font-bold uppercase">Visualizaciones</p>
                                 </div>
-                                <p class="text-3xl font-black">5,640</p>
-                                <p class="text-sm text-emerald-300 mt-2">+39,900%</p>
+                                <p class="metric-value font-black">5,640</p>
+                                <p class="metric-trend text-emerald-300">+39,900%</p>
                             </div>
-                            <div class="rounded-2xl border border-[#8A2BE2]/35 bg-[#8A2BE2]/10 p-4">
-                                <div class="flex items-center gap-2 text-[#8A2BE2] mb-3">
+                            <div class="social-metric-card border border-[#8A2BE2]/35 bg-[#8A2BE2]/10">
+                                <div class="metric-label flex items-center gap-1.5 text-[#8A2BE2]">
                                     <i class="fas fa-thumbs-up"></i>
-                                    <p class="text-xs font-bold uppercase tracking-[0.18em]">Interacciones</p>
+                                    <p class="font-bold uppercase">Interacciones</p>
                                 </div>
-                                <p class="text-3xl font-black">254</p>
-                                <p class="text-sm text-emerald-300 mt-2">+100%</p>
+                                <p class="metric-value font-black">254</p>
+                                <p class="metric-trend text-emerald-300">+100%</p>
                             </div>
-                            <div class="rounded-2xl border border-[#FF1493]/35 bg-[#FF1493]/10 p-4">
-                                <div class="flex items-center gap-2 text-[#FF1493] mb-3">
+                            <div class="social-metric-card border border-[#FF1493]/35 bg-[#FF1493]/10">
+                                <div class="metric-label flex items-center gap-1.5 text-[#FF1493]">
                                     <i class="fas fa-user-plus"></i>
-                                    <p class="text-xs font-bold uppercase tracking-[0.18em]">Seguidores netos</p>
+                                    <p class="font-bold uppercase">Seguidores netos</p>
                                 </div>
-                                <p class="text-3xl font-black">1</p>
-                                <p class="text-sm text-white/45 mt-2">0%</p>
+                                <p class="metric-value font-black">1</p>
+                                <p class="metric-trend text-white/45">0%</p>
                             </div>
                         </div>
 
                         <div class="social-chart rounded-[1.5rem] border border-white/10 bg-[#050a12]/70 p-5">
-                            <svg class="w-full h-[290px]" viewBox="0 0 760 300" role="img" aria-label="Gráfica de visualizaciones de Facebook">
+                            <svg viewBox="0 0 760 300" role="img" aria-label="Gráfica de visualizaciones de Facebook" preserveAspectRatio="xMidYMid meet">
                                 <defs>
                                     <linearGradient id="mezaChartFill" x1="0" x2="0" y1="0" y2="1">
                                         <stop offset="0%" stop-color="#00F0FF" stop-opacity="0.26"/>
@@ -1362,15 +1568,15 @@
                         </div>
 
                         <div class="grid md:grid-cols-2 gap-4 mt-5">
-                            <div class="rounded-2xl border border-white/10 bg-white/[0.055] p-5">
-                                <p class="text-[10px] uppercase tracking-[0.28em] text-white/40 mb-2">Lectura rápida</p>
-                                <h3 class="text-xl font-black mb-2">Pico fuerte el 20 de mayo</h3>
-                                <p class="text-sm text-white/65">La cuenta subió hasta aproximadamente 1,500 visualizaciones en el día más alto.</p>
+                            <div class="social-impact-card">
+                                <p class="text-[10px] uppercase tracking-[0.28em] text-[#00F0FF]/70 mb-2">Impacto clave</p>
+                                <h3 class="text-xl font-black mb-2">Mayor visibilidad local.</h3>
+                                <p class="text-sm text-white/65">La cuenta alcanzó un pico cercano a 1,500 visualizaciones y fortaleció el reconocimiento del negocio.</p>
                             </div>
-                            <div class="rounded-2xl border border-white/10 bg-white/[0.055] p-5">
+                            <div class="social-impact-card">
                                 <p class="text-[10px] uppercase tracking-[0.28em] text-white/40 mb-2">Trabajo social</p>
-                                <h3 class="text-xl font-black mb-2">Contenido + medición</h3>
-                                <p class="text-sm text-white/65">Publicaciones, creatividades y lectura de rendimiento para mejorar el perfil.</p>
+                                <h3 class="text-xl font-black mb-2">Contenido + medición.</h3>
+                                <p class="text-sm text-white/65">Publicaciones, creatividades y lectura de rendimiento para mejorar el perfil con intención comercial.</p>
                             </div>
                         </div>
                     </div>
@@ -1383,7 +1589,7 @@
                 <div class="relative z-10 grid lg:grid-cols-[0.85fr_1.15fr] gap-8 items-start">
                     <div class="rounded-[1.75rem] border border-white/10 bg-[#050a12]/70 p-2 sm:p-5">
                         <a href="https://www.facebook.com/MarketaMinisuper/" target="_blank" rel="noopener noreferrer" class="social-screenshot relative rounded-[1.35rem] border border-white/10 bg-gradient-to-br from-lime-200/20 via-emerald-500/10 to-orange-400/10 mb-6" aria-label="Abrir Facebook de Marketa Mía">
-                            <img src="assets/marketa-facebook.png" alt="Captura real del Facebook de Marketa Mía" width="1244" height="719" class="relative z-10 w-full h-auto object-cover shadow-[0_0_45px_rgba(132,204,22,0.18)]" loading="lazy" decoding="async">
+                            <img src="./assets/marketa-facebook.png" alt="Captura real del Facebook de Marketa Mía" width="1244" height="719" class="relative z-10 shadow-[0_0_45px_rgba(132,204,22,0.18)]" loading="lazy" decoding="async">
                         </a>
 
                         <div class="flex items-start justify-between gap-4">
@@ -1413,32 +1619,32 @@
                             </div>
                         </div>
 
-                        <div class="grid sm:grid-cols-2 xl:grid-cols-4 gap-3 mb-5">
-                            <div class="rounded-2xl border border-lime-300/35 bg-lime-300/10 p-4">
-                                <p class="text-xs font-bold uppercase tracking-[0.18em] text-lime-300 mb-3">Alcance</p>
-                                <p class="text-3xl font-black">18,420</p>
-                                <p class="text-sm text-emerald-300 mt-2">+248%</p>
+                        <div class="social-metrics-grid grid grid-cols-2 xl:grid-cols-4 gap-2 sm:gap-3 mb-4">
+                            <div class="social-metric-card border border-lime-300/35 bg-lime-300/10">
+                                <p class="metric-label font-bold uppercase text-lime-300">Alcance</p>
+                                <p class="metric-value font-black">18,420</p>
+                                <p class="metric-trend text-emerald-300">+248%</p>
                             </div>
-                            <div class="rounded-2xl border border-orange-300/35 bg-orange-300/10 p-4">
-                                <p class="text-xs font-bold uppercase tracking-[0.18em] text-orange-300 mb-3">Mensajes</p>
-                                <p class="text-3xl font-black">412</p>
-                                <p class="text-sm text-emerald-300 mt-2">+96%</p>
+                            <div class="social-metric-card border border-orange-300/35 bg-orange-300/10">
+                                <p class="metric-label font-bold uppercase text-orange-300">Mensajes</p>
+                                <p class="metric-value font-black">412</p>
+                                <p class="metric-trend text-emerald-300">+96%</p>
                             </div>
-                            <div class="rounded-2xl border border-emerald-300/35 bg-emerald-300/10 p-4">
-                                <p class="text-xs font-bold uppercase tracking-[0.18em] text-emerald-300 mb-3">Interacciones</p>
-                                <p class="text-3xl font-black">1,186</p>
-                                <p class="text-sm text-emerald-300 mt-2">+173%</p>
+                            <div class="social-metric-card border border-emerald-300/35 bg-emerald-300/10">
+                                <p class="metric-label font-bold uppercase text-emerald-300">Interacciones</p>
+                                <p class="metric-value font-black">1,186</p>
+                                <p class="metric-trend text-emerald-300">+173%</p>
                             </div>
-                            <div class="rounded-2xl border border-[#00F0FF]/35 bg-[#00F0FF]/10 p-4">
-                                <p class="text-xs font-bold uppercase tracking-[0.18em] text-[#00F0FF] mb-3">Sucursales</p>
-                                <p class="text-3xl font-black">4</p>
-                                <p class="text-sm text-emerald-300 mt-2">en la zona</p>
+                            <div class="social-metric-card border border-[#00F0FF]/35 bg-[#00F0FF]/10">
+                                <p class="metric-label font-bold uppercase text-[#00F0FF]">Sucursales</p>
+                                <p class="metric-value font-black">4</p>
+                                <p class="metric-trend text-emerald-300">en la zona</p>
                             </div>
                         </div>
 
                         <div class="grid xl:grid-cols-[1fr_0.65fr] gap-4">
                             <div class="social-chart rounded-[1.5rem] border border-white/10 bg-[#050a12]/70 p-5">
-                                <svg class="w-full h-[250px]" viewBox="0 0 760 260" role="img" aria-label="Gráfica de rendimiento local de Marketa Mía">
+                                <svg viewBox="0 0 760 260" role="img" aria-label="Gráfica de rendimiento local de Marketa Mía" preserveAspectRatio="xMidYMid meet">
                                     <defs>
                                         <linearGradient id="marketaCaseFill" x1="0" x2="0" y1="0" y2="1">
                                             <stop offset="0%" stop-color="#A3E635" stop-opacity="0.28"/>
@@ -1477,8 +1683,8 @@
                                 </svg>
                             </div>
 
-                            <div class="rounded-[1.5rem] border border-lime-300/20 bg-lime-300/10 p-5 flex flex-col justify-center">
-                                <p class="text-[10px] uppercase tracking-[0.28em] text-lime-200/70 mb-3">Impacto</p>
+                            <div class="social-impact-card border-lime-300/20 bg-lime-300/10 flex flex-col justify-center">
+                                <p class="text-[10px] uppercase tracking-[0.28em] text-lime-200/70 mb-3">Impacto clave</p>
                                 <h4 class="text-2xl font-black mb-3">Más presencia, más puntos de venta.</h4>
                                 <p class="text-sm text-white/65">Gracias al posicionamiento en redes, Marketa Mía fortaleció su presencia y pudo crecer 4 sucursales en la zona.</p>
                             </div>
@@ -1921,7 +2127,7 @@
             <div class="flex flex-col md:flex-row justify-between items-center gap-8">
                 <div>
                     <a href="#inicio" class="inline-flex items-center gap-3">
-                        <img src="assets/ruth-leyva-logo.svg" alt="Logo de la Rosa Leyva" class="h-10 w-10 rounded-full bg-white p-1 shadow-lg" decoding="async">
+                        <img src="./assets/ruth-leyva-logo.svg" alt="Logo de la Rosa Leyva" class="h-10 w-10 rounded-full bg-white p-1 shadow-lg" decoding="async">
                         <div class="leading-tight">
                             <p class="font-black text-lg">de la Rosa Leyva</p>
                             <p class="text-white/60 text-sm">Crecimiento digital con intención</p>
@@ -1952,14 +2158,14 @@
 
     <div id="lightbox" class="lightbox fixed inset-0 z-[60] flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
-        <div class="lightbox-panel relative z-10 w-[min(94vw,1100px)]">
+        <div class="lightbox-panel relative z-10 w-[min(96vw,1280px)]">
             <button id="lightbox-close" class="absolute -top-12 right-0 text-white text-3xl" aria-label="Cerrar vista ampliada">
                 <i class="fas fa-times"></i>
             </button>
             <div class="service-card rounded-[1.5rem] overflow-hidden max-h-[82vh]">
-                <div class="grid lg:grid-cols-[1.25fr_0.75fr]">
-                    <div class="relative bg-[#050a12]">
-                        <img id="lightbox-image" src="" alt="" class="w-full h-full max-h-[82vh] object-contain lg:object-cover">
+                <div class="grid lg:grid-cols-[1.55fr_0.65fr]">
+                    <div class="relative bg-[#050a12] flex items-center justify-center">
+                        <img id="lightbox-image" src="" alt="" class="w-full h-auto max-h-[82vh] object-contain">
                     </div>
                     <div class="p-5 sm:p-6 lg:p-7 space-y-5 max-h-[82vh] overflow-y-auto border-t lg:border-t-0 lg:border-l border-white/10">
                         <div>
@@ -2063,7 +2269,7 @@
                 ],
                 stack: ["Dashboard", "Inventario", "Roles", "Alertas"],
                 detail: "Pensado para trabajar con panel ejecutivo, inventario en vivo, notificaciones y accesos por rol sin fricción.",
-                image: "shots/opticore-erp.png"
+                image: "./shots/opticore-erp.png"
             },
             {
                 title: "Distribuidora PRO v3.1",
@@ -2083,7 +2289,7 @@
                 ],
                 stack: ["POS", "Cobranza", "Stock", "Clientes"],
                 detail: "Diseñado para controlar ventas, inventario y cobranza con una experiencia clara para operación diaria.",
-                image: "shots/distribuidora-pro.png"
+                image: "./shots/distribuidora-pro.png"
             },
             {
                 title: "Carnicería El Oriente POS",
@@ -2103,7 +2309,7 @@
                 ],
                 stack: ["POS", "Caja", "Inventario", "Crédito"],
                 detail: "Sistema operativo con ventas, compras, cortes de carne, clientes, abonos, exportación e impresión de tickets.",
-                image: "shots/carniceria-el-oriente.png"
+                image: "./shots/carniceria-el-oriente.png"
             },
             {
                 title: "Taller de la Rosa",
@@ -2123,7 +2329,7 @@
                 ],
                 stack: ["Órdenes", "Agenda", "Reportes", "Garantías"],
                 detail: "Construido para recibir, mover y cerrar servicios con trazabilidad y seguimiento de punta a punta.",
-                image: "shots/taller-de-la-rosa.png"
+                image: "./shots/taller-de-la-rosa.png"
             },
             {
                 title: "Grupo Avícola Salas",
@@ -2143,7 +2349,7 @@
                 ],
                 stack: ["Cloud", "Inventario", "Ventas", "Salidas"],
                 detail: "Pensado para monitorear inventario y movimientos diarios desde un panel centralizado.",
-                image: "shots/grupo-avicola-salas.png"
+                image: "./shots/grupo-avicola-salas.png"
             },
             {
                 title: "GoPro Fishing",
@@ -2163,7 +2369,7 @@
                 ],
                 stack: ["Landing", "Galería", "Catálogo", "CTA"],
                 detail: "Un sitio pensado para mostrar la marca, destacar sus productos y convertir interés en contacto.",
-                image: "shots/gopro-fishing.png"
+                image: "./shots/gopro-fishing.png"
             }
         ];
 
@@ -2195,35 +2401,36 @@
                                     <span class="w-2 h-2 rounded-full" style="background:${accent}; box-shadow:0 0 14px ${accent};"></span>
                                     ${escapeHtml(item.category)}
                                 </div>
-                                <span class="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/10 text-xs font-bold backdrop-blur-md">
-                                    Ver imagen <i class="fas fa-up-right-and-square"></i>
+                                <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/10 text-xs font-bold backdrop-blur-md">
+                                    Expandir <i class="fas fa-up-right-and-square"></i>
                                 </span>
                             </div>
                         </div>
 
                         <div class="case-body p-5 sm:p-6">
                             <div class="mb-4">
-                                <div class="flex flex-wrap items-center gap-2 mb-3">
+                                <div class="portfolio-stack flex flex-wrap items-center gap-2 mb-3">
                                     ${stackTags}
                                 </div>
                                 <h3 class="text-2xl sm:text-3xl font-black mb-3">${escapeHtml(item.title)}</h3>
-                                <p class="text-white/75 text-sm sm:text-base leading-relaxed">${escapeHtml(item.description)}</p>
+                                <p class="portfolio-description text-white/75 text-sm sm:text-base leading-relaxed">${escapeHtml(item.description)}</p>
                             </div>
 
-                            <div class="grid grid-cols-3 gap-3 mb-5">
+                            <div class="portfolio-metrics grid grid-cols-3 gap-3 mb-5">
                                 ${metrics}
                             </div>
 
-                            <div class="flex flex-wrap gap-2 mb-5">
+                            <div class="portfolio-tags flex flex-wrap gap-2 mb-5">
+                                <p class="portfolio-mini-label w-full text-[10px] uppercase tracking-[0.26em] text-white/40">Implementado</p>
                                 ${featureTags}
                             </div>
 
-                            <div class="mt-auto rounded-2xl border border-white/10 bg-white/[0.045] p-4">
+                            <div class="portfolio-impact mt-auto rounded-2xl border border-white/10 bg-white/[0.045] p-4">
                                 <p class="text-[10px] uppercase tracking-[0.28em] text-white/45 mb-2">Impacto clave</p>
                                 <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-                                    <p class="text-sm text-white/[0.82] leading-relaxed">${escapeHtml(item.impact)}</p>
-                                    <span class="inline-flex items-center gap-2 text-sm font-black text-white/90 whitespace-nowrap">
-                                        Abrir caso <i class="fas fa-arrow-right" style="color:${accent};"></i>
+                                    <p class="portfolio-impact-text text-sm text-white/[0.82] leading-relaxed">${escapeHtml(item.impact)}</p>
+                                    <span class="portfolio-expand-btn whitespace-nowrap">
+                                        Expandir <i class="fas fa-arrow-right" style="color:${accent};"></i>
                                     </span>
                                 </div>
                             </div>
