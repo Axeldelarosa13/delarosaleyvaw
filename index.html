@@ -9,9 +9,9 @@
     <meta property="og:title" content="de la Rosa Leyva | Agencia Digital">
     <meta property="og:description" content="Marketing, diseño web, automatización e IA para marcas que quieren crecer con una presencia digital premium.">
     <meta property="og:type" content="website">
-    <meta property="og:image" content="./assets/de-la-rosa-leyva-logo.jpg">
+    <meta property="og:image" content="./assets/de-la-rosa-leyva-logo.png">
     <meta name="twitter:card" content="summary_large_image">
-    <link rel="icon" type="image/jpeg" href="./assets/de-la-rosa-leyva-logo.jpg">
+    <link rel="icon" type="image/png" href="./assets/de-la-rosa-leyva-logo.png">
     <title>de la Rosa Leyva | Agencia Digital</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1146,7 +1146,7 @@
     <nav id="site-nav" class="fixed top-0 w-full z-50 py-3 border-b border-white/10 bg-[#07111f]/70 backdrop-blur-xl">
         <div class="container mx-auto px-4 flex justify-between items-center">
             <a href="#inicio" class="flex items-center gap-3">
-                <img src="./assets/de-la-rosa-leyva-logo.jpg" alt="Logo de la Rosa Leyva" class="h-12 w-12 rounded-full bg-white p-1 shadow-lg object-contain hover:scale-105 transition-transform" decoding="async">
+                <img src="./assets/de-la-rosa-leyva-logo.png" alt="Logo de la Rosa Leyva" width="512" height="512" class="h-14 w-14 rounded-full bg-white p-0.5 shadow-lg ring-2 ring-white/15 object-cover hover:scale-105 transition-transform" decoding="async">
                 <div class="hidden sm:block leading-tight">
                     <p class="text-sm font-black tracking-wide">de la Rosa Leyva</p>
                     <p class="text-[10px] uppercase tracking-[0.35em] text-white/45">Agencia Digital</p>
@@ -2129,7 +2129,7 @@
             <div class="flex flex-col md:flex-row justify-between items-center gap-8">
                 <div>
                     <a href="#inicio" class="inline-flex items-center gap-3">
-                        <img src="./assets/de-la-rosa-leyva-logo.jpg" alt="Logo de la Rosa Leyva" class="h-10 w-10 rounded-full bg-white p-1 shadow-lg object-contain" decoding="async">
+                        <img src="./assets/de-la-rosa-leyva-logo.png" alt="Logo de la Rosa Leyva" width="512" height="512" class="h-11 w-11 rounded-full bg-white p-0.5 shadow-lg ring-2 ring-white/15 object-cover" decoding="async">
                         <div class="leading-tight">
                             <p class="font-black text-lg">de la Rosa Leyva</p>
                             <p class="text-white/60 text-sm">Crecimiento digital con intención</p>
@@ -2200,6 +2200,10 @@
                             <p class="text-[10px] uppercase tracking-[0.3em] text-white/40 mb-2">Detalle</p>
                             <p id="lightbox-detail" class="text-white/70 text-sm leading-relaxed">Haz clic fuera o pulsa ESC para cerrar.</p>
                         </div>
+
+                        <a id="lightbox-url" href="#" target="_blank" rel="noopener noreferrer" class="hidden items-center justify-center gap-2 rounded-full border border-[#00F0FF]/25 bg-[#00F0FF]/12 px-5 py-3 text-sm font-black text-[#00F0FF] hover:bg-[#00F0FF] hover:text-[#07111f] transition-all">
+                            Abrir sitio en vivo <i class="fas fa-arrow-up-right-from-square"></i>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -2312,6 +2316,28 @@
                 stack: ["POS", "Caja", "Inventario", "Crédito"],
                 detail: "Sistema operativo con ventas, compras, cortes de carne, clientes, abonos, exportación e impresión de tickets.",
                 image: "./shots/carniceria-el-oriente.png"
+            },
+            {
+                title: "Abarrotes Betty POS en la nube",
+                description: "Punto de venta en la nube para abarrotes con ventas, clientes, productos, inventario, caja y sincronización.",
+                category: "POS / Nube",
+                impact: "Permite vender, controlar stock y registrar caja desde una terminal rápida, con acceso cloud para mantener la operación sincronizada.",
+                implemented: [
+                    "Ventas con lector de código",
+                    "Clientes y crédito",
+                    "Inventario y catálogo",
+                    "Caja y cortes",
+                    "Sincronización Firebase"
+                ],
+                metrics: [
+                    { value: "5", label: "Módulos" },
+                    { value: "Cloud", label: "Acceso" },
+                    { value: "F1-F5", label: "Atajos" }
+                ],
+                stack: ["POS", "Nube", "Inventario", "Caja"],
+                detail: "Incluye ventas, clientes, catálogo, control de stock, historial de tickets, movimientos de cajón, cortes de caja y acceso en la nube para sincronizar datos.",
+                image: "./shots/abarrotes-betty-pos.png",
+                url: "https://axeldelarosa13.github.io/abarrotesbetty/"
             },
             {
                 title: "Taller de la Rosa",
@@ -2580,6 +2606,7 @@
         const lightboxImpact = document.getElementById('lightbox-impact');
         const lightboxStack = document.getElementById('lightbox-stack');
         const lightboxDetail = document.getElementById('lightbox-detail');
+        const lightboxUrl = document.getElementById('lightbox-url');
         const lightboxClose = document.getElementById('lightbox-close');
 
         document.querySelectorAll('.portfolio-trigger').forEach((button) => {
@@ -2612,6 +2639,15 @@
                     <span class="inline-flex items-center rounded-full border border-white/10 bg-white/[0.08] px-3 py-1.5 text-[12px] font-semibold text-white/85">${escapeHtml(tag)}</span>
                 `).join('');
                 lightboxDetail.textContent = item.detail;
+                if (item.url) {
+                    lightboxUrl.href = item.url;
+                    lightboxUrl.classList.remove('hidden');
+                    lightboxUrl.classList.add('inline-flex');
+                } else {
+                    lightboxUrl.removeAttribute('href');
+                    lightboxUrl.classList.add('hidden');
+                    lightboxUrl.classList.remove('inline-flex');
+                }
                 lightbox.classList.add('show');
                 document.body.style.overflow = 'hidden';
             });
